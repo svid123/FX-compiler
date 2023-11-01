@@ -11,19 +11,33 @@ Extensions of standard HLSL are
 1) Support for 'enum' keyword (translates values into macro definitins, enum)
 2) Precompiler collects global initializers of constants and sampelers (and removes from HLSL for DXC).
 3) Has it's own C preprocessor with supported keywords:
-   **#include
-   #define
-   #if
-   #ifdef
-   #else
-   #elif
-   #endif
-   #pragma** (once, far_extern)
+ 
+   **#include**
+   
+   **#define**
+   
+   **#if**
+   
+   **#ifdef**
+   
+   **#else**
+   
+   **#elif**
+   
+   **#endif**
+   
+   **#pragma** (once, far_extern)
+   
      Supported built-in macros:
-   __LINE__
-   __FILE__
-   __DATE__
-   __TIME__
+
+   ____LINE____
+
+   ____FILE____
+
+   ____DATE____
+
+   ____TIME____
+ 
    Allows bypass of preprocessor keywords for DXC using ## for keyword (like ##ifdef)
 5) Has internal constant-expressions parser for preprocessor #if keyword and all the FX entities (i.e. DepthBias=1+0.5*2)
    
