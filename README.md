@@ -99,7 +99,7 @@ DepthStencilState DSS_NoZWriteGreaterEqual
 
 Example of samplers definition
 ```
-SamplerState g_aSamplers[2]=	//array of samplers enrolled to separate samplers
+SamplerState g_aSamplers[2]=	//array of samplers
 {
 	SamplerState	//Lerp
 	{
