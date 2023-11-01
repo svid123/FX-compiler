@@ -19,22 +19,23 @@ Extensions of standard HLSL are<br />
 2) Converts character string of initializers into array of characters (i.e. uint chars[]="text" => uint chars[]={'t','e','x','t'})
 3) Precompiler collects global initializers of constants and sampelers (and removes from HLSL for DXC).
 4) Has it's own C preprocessor with supported keywords:<br /> 
-   **#include**<br />
-   **#define**<br />
-   **#if**<br />
-   **#ifdef**<br />
-   **#else**<br />
-   **#elif**<br />
-   **#endif**<br />
-   **#pragma** (once, far_extern)<br />
-   <p>Supported built-in macros:<br/>
-   __LINE__<br />
-   __FILE__<br />
-   __DATE__<br />
-   __TIME__<br />
+	**#include**<br />
+	**#define**<br />
+	**#if**<br />
+	**#ifdef**<br />
+	**#else**<br />
+	**#elif**<br />
+	**#endif**<br />
+	**#pragma** (once, far_extern)<br />
+	<p>Supported built-in macros:<br/>
+	__LINE__<br />
+	__FILE__<br />
+	__DATE__<br />
+	__TIME__<br />
+	__VA_ARG__<br />
    </p>
    Allows bypass of preprocessor keywords for DXC using ## for keyword (like ##ifdef)<br />
-   Supports standard C macro expansion for macro arguments
+   Supports standard C macro expansion for macro arguments 
 5) Has internal constant-expressions parser for preprocessor #if keyword and all the FX entities (i.e. DepthBias=1+0.5*2)
 6) Provides bypass ## for preprocessor keywords (such directives are not processed by FXSys and kept for DXC)
 7) Precompiler keywords<br/>
