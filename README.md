@@ -14,7 +14,7 @@ What it does:<br/>
 * Automatically build serparate passes for pass group based on DefRange-s
 
 Extensions of standard HLSL are<br />
-1) Support for 'enum' keyword (translates values into macro definitins, enum)
+1) Support for 'enum' keyword (translates values into macro definitins, enum tag in HLSL treated as 'int' type)
 2) Converts character string of initializers into array of characters (i.e. uint chars[]="text" => uint chars[]={'t','e','x','t'})
 3) Precompiler collects global initializers of constants and sampelers (and removes from HLSL for DXC).
 4) Has it's own C preprocessor with supported keywords:<br /> 
