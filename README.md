@@ -90,8 +90,31 @@ DepthStencilState DSS_NoZWriteGreaterEqual
 };
 ```
 
-Example of sampler definition
+Example of samplers definition
 ```
+SamplerState g_aSamplers[2]=	//array of samplers enrolled to separate samplers
+{
+	SamplerState	//Lerp
+	{
+		Filter=MIN_MAG_MIP_LINEAR;
+		AddressU = Wrap;
+		AddressV = Wrap;
+		AddressW = Wrap;
+
+		Filter=ANISOTROPIC;
+		MaxAnisotropy=8;
+	},
+
+	SamplerState	//Point
+	{
+		Filter=MIN_MAG_MIP_POINT;
+		AddressU = Wrap;
+		AddressV = Wrap;
+		AddressW = Wrap;
+		MaxLOD=0;
+	}
+};
+
 sampler LerpSampler
 {
 	Filter=MIN_MAG_MIP_LINEAR;
