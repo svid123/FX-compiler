@@ -6,6 +6,7 @@ Basically it translates FX HLSL into raw HLSL sources with removed parts of non-
 Compiler provides object SFXCode with compiled DX bytecode and additional render state settings such as: BlendState, RasterState, DepthstencilState, as well as definitions in Microsoft FX-like manner.<br />
 Currently render state objects reflects DX11-like render state objects (i.e. no conservative rasterizer in RasterDesc etc.)<br />
 Additionaly it provides global definitions per pass, definition-ranges per pass with automatically built variants of passes for each value of definition range<br />
+Precompiler removes redunant code for given pass to speedup DXC ompiling as well as remove possible conflicts due to pass definitions<br/>
 
 Extensions of standard HLSL are<br />
 1) Support for 'enum' keyword (translates values into macro definitins, enum)
