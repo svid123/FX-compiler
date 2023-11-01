@@ -8,7 +8,7 @@ Currently render state objects reflects DX11-like render state objects (i.e. no 
 Additionaly it provides global definitions per pass, definition-ranges per pass with automatically built variants of passes for each value of definition range<br />
 
 What it does:<br/>
-* Parses all the sources into single translation unit (i.e. all the includes are emplaced into final translation unit for DXC)
+* Parses all the sources of translation unit into single translation unit (i.e. all the includes are emplaced into final translation unit for DXC)
 * Removes redunant code for given pass to speedup DXC compiling as well as remove possible conflicts due to pass definitions
 * Collects into SFXCode structure and removes global constants initializers from HLSL (like 'float4 g_vSetting=float4(1,1,1,0)' => 'float4 g_vSetting'). Supported array initializers for global, as well as character string initializers for local variables
 * Automatically build separate passes for pass group based on DefRange-s
