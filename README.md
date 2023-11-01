@@ -18,7 +18,7 @@ Extensions of standard HLSL are<br />
 1) Support for 'enum' keyword (translates values into macro definitins, enum tag in HLSL treated as 'int' type)
 2) Converts character string of initializers into array of characters (i.e. uint chars[]="text" => uint chars[]={'t','e','x','t'})
 3) Precompiler collects global initializers of constants and sampelers (and removes from HLSL for DXC).
-4) Has it's own C preprocessor with supported keywords:<br /> 
+4) Has it's own C preprocessor with supported directives:<br /> 
 	**#include**<br />
 	**#define**<br />
 	**#if**<br />
@@ -34,7 +34,7 @@ Extensions of standard HLSL are<br />
 	__TIME__<br />
 	__VA_ARG__<br />
    </p>
-   Allows bypass of preprocessor keywords for DXC using ## for keyword (like ##ifdef)<br />
+   Allows bypass of preprocessor directives for DXC using ## for keyword (like ##ifdef)<br />
    Supports standard C macro expansion for macro arguments 
 5) Has internal constant-expressions parser for preprocessor #if keyword and all the FX entities (i.e. DepthBias=1+0.5*2)
 6) Provides bypass ## for preprocessor keywords (such directives are not processed by FXSys and kept for DXC)
