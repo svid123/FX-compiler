@@ -1,5 +1,5 @@
 # FXSys
-HLSL Effect precompiler based on EBNF and DXC for DX12
+Lightweight HLSL Effect precompiler based on EBNF and DXC for DX12
 
 Currently provided sources and project are intended for MSVS2022.<br />
 Basically it translates FX HLSL into raw HLSL sources with removed parts of non-standard HLSL code and adds macro definitions for HLSL DXC compiler<br />
