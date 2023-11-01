@@ -56,10 +56,11 @@ technique T0	//tech name
 		SetDepthStencilState(DSS_NoZNoWrite,0);
 		SetRasterizerState(RS_NoCull);
 
-		g_fZ=0;					//Global macro definitions
+		g_fZ=0;			//Global macro definitions
 		g_bReplaceAlpha=false;	//..
 		g_bPointSample=false;	//..
 		g_bDiscardPixels=true;	//..
+		DefRange(g_nShadingMode,0,5)	//Definition range for auto-generated versions of P0 pass
 
 		SetVertexShader(40, VertOut);	//Entry points
 		SetPixelShader(40, PixOut);		//..
