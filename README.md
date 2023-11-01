@@ -2,7 +2,7 @@
 Lightweight HLSL Effect precompiler based on EBNF and DXC for DX12
 
 Currently provided sources and project are intended for MSVS2022.<br />
-Basically it translates FX HLSL into raw HLSL sources with removed parts of non-standard HLSL code and adds macro definitions for HLSL DXC compiler<br />
+Basically it translates FX HLSL into raw HLSL sources with removed parts of non-standard HLSL code and adds macro definitions for HLSL DXC compiler (not included)<br />
 Compiler provides object SFXCode with compiled DX bytecode and additional render state settings such as: BlendState, RasterState, DepthstencilState, sampler states, global initializers as well as definitions in Microsoft FX-like manner.<br />
 Currently render state objects reflects DX11-like render state objects (i.e. no conservative rasterizer in RasterDesc etc.)<br />
 Additionaly it provides global definitions per pass, definition-ranges per pass with automatically built variants of passes for each value of definition range<br />
