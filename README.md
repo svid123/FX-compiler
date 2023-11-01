@@ -9,8 +9,9 @@ Additionaly it provides global definitions per pass, definition-ranges per pass 
 
 Extensions of standard HLSL are<br />
 1) Support for 'enum' keyword (translates values into macro definitins, enum)
-2) Precompiler collects global initializers of constants and sampelers (and removes from HLSL for DXC).
-3) Has it's own C preprocessor with supported keywords:<br /> 
+2) Converts character string of initializers into array of characters (i.e. uint chars[]="text" => uint chars[]={'t','e','x','t'})
+3) Precompiler collects global initializers of constants and sampelers (and removes from HLSL for DXC).
+4) Has it's own C preprocessor with supported keywords:<br /> 
    **#include**<br />
    **#define**<br />
    **#if**<br />
@@ -28,4 +29,23 @@ Extensions of standard HLSL are<br />
    Allows bypass of preprocessor keywords for DXC using ## for keyword (like ##ifdef)<br />
    Supports standard C macro expansion for macro arguments
 5) Has internal constant-expressions parser for preprocessor #if keyword and all the FX entities (i.e. DepthBias=1+0.5*2)
+6) Provides bypass ## for preprocessor keywords (such directives are not processed by FXSys and kept for DXC)
+7) Precompiler keywords<br/>
+   **technique**<br/>
+   **pass**<br/>
+   **DefRange**<br/>
+   **RasterizerState**<br/>
+   **BlendState**<br/>
+   **SetBlendState**<br/>
+   **SetRasterizerState**<br/>
+   **SetDepthStencilState**<br/>
+   **SetVertexShader**<br/>
+   **SetPixelShader**<br/>
+   **SetGeometryShader**<br/>
+   **SetHullShader**<br/>
+   **SetDomainShader**<br/>
+   **SetComputeShader**<br/>
+   
+   
+   
    
