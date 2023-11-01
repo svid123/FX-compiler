@@ -63,7 +63,7 @@ technique T0	//tech name
 		DefRange(g_nShadingMode,0,5)	//Definition range for auto-generated versions of P0 pass
 
 		SetVertexShader(40, VertOut);	//Entry points
-		SetPixelShader(40, PixOut);		//..
+		SetPixelShader(40, PixOut);	//..
     }
 
     pass P1
@@ -77,7 +77,7 @@ technique T0	//tech name
 		g_bDiscardPixels=false;
 
 		SetVertexShader(40, VertOut);	//vs_4_0 shader model
-		SetPixelShader(40, PixOut);		//ps_4_0 ..
+		SetPixelShader(40, PixOut);	//ps_4_0 ..
     }
 }
 ```
