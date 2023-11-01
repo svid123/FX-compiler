@@ -26,5 +26,6 @@ Extensions of standard HLSL are<br />
    __TIME__<br />
    </p>
    Allows bypass of preprocessor keywords for DXC using ## for keyword (like ##ifdef)<br />
+   Supports standard C macro expansion for macro arguments
 5) Has internal constant-expressions parser for preprocessor #if keyword and all the FX entities (i.e. DepthBias=1+0.5*2)
    
