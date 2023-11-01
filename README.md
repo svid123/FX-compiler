@@ -39,6 +39,7 @@ Extensions of standard HLSL are<br />
 5) Has internal constant-expressions parser for preprocessor #if keyword and all the FX entities (i.e. DepthBias=1+0.5*2)
 6) Provides bypass ## for preprocessor keywords (such directives are not processed by FXSys and kept for DXC)
 7) Precompiler keywords<br/>
+   **enum**<br/>
    **technique**<br/>
    **pass**<br/>
    **DefRange**<br/>
