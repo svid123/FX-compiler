@@ -45,7 +45,58 @@ Extensions of standard HLSL are<br />
    **SetHullShader**<br/>
    **SetDomainShader**<br/>
    **SetComputeShader**<br/>
-   
-   
-   
-   
+
+Example syntax for technique definition:
+```
+technique T0	//tech name
+{
+    pass P0		//pass name
+    {
+		SetBlendState(BS_AlphaBlend,0xFFFFFFFF,0xFFFFFFFF);
+		SetDepthStencilState(DSS_NoZNoWrite,0);
+		SetRasterizerState(RS_NoCull);
+
+		g_fZ=0;					//Global macro definitions
+		g_bReplaceAlpha=false;	//..
+		g_bPointSample=false;	//..
+		g_bDiscardPixels=true;	//..
+
+		SetVertexShader(40, VertOut);	//Entry points
+		SetPixelShader(40, PixOut);		//..
+    }
+
+    pass P1
+    {
+		SetDepthStencilState(DSS_NoZWriteLess,0);
+		SetRasterizerState(RS_NoCull);
+		
+		g_fZ=0;
+		g_bReplaceAlpha=false;
+		g_bPointSample=false;
+		g_bDiscardPixels=false;
+
+		SetVertexShader(40, VertOut);	//vs_4_0 shader model
+		SetPixelShader(40, PixOut);		//ps_4_0 ..
+    }
+}
+```
+
+Example of state definition:
+```
+DepthStencilState DSS_NoZWriteGreaterEqual
+{
+	DepthWriteMask=0;
+	DepthFunc=Greater_equal;
+};
+```
+
+Example of sampler definition
+```
+sampler LerpSampler
+{
+	Filter=MIN_MAG_MIP_LINEAR;
+
+	AddressU = CLAMP;
+    AddressV = CLAMP;
+};
+```
