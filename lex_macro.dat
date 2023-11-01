@@ -1,0 +1,34 @@
+{letters}=[a-zA-Z_]
+{letters_numbers}=[0-9a-zA-Z_]
+{numbers}=[0-9]
+{spaces}=['\x1'-'\x20' ^'\r''\n']
+{inv_chars}=['\x7e'-'\xff'#]
+{any_chars}=['\x1'-'\xff']
+{str_chars}=['\x1'-'\xff' ^'\r''\n''"']
+{rest_chars}=[@$`'!''%'-"'" '*''+' '-'-'?' '['-'_' '|''~']
+
+
+[ETN_INVALID]={inv_chars}+
+[newline]='\n' | ('\r''\n')
+[esc_newline]='\\' ('\n' | ('\r''\n'))
+[eof]='\x0'
+
+
+[ETN_PREP_SPACE,' ']={spaces}+
+[ETN_PREP_ID]={letters}+{letters_numbers}*
+[ETN_PREP_COMMA, ,]=,
+[ETN_PREP_MBRACEC_OPEN, '(']='('
+[ETN_PREP_MBRACEC_CLOSE, ')']=')'
+[ETN_PREP_MBLOCK_OPEN, '{']='{'
+[ETN_PREP_MBLOCK_CLOSE, '}']='}'
+[ETN_PREP_REST]={rest_chars}+
+
+
+
+
+
+[ETN_PREP_STR,"string"]='"' {str_chars}* '"'
+
+
+[line_comment]=// {any_chars}* | '\n'^
+[ETN_COMMENT_BLOCK]="/*" {any_chars}* | ("*/")^
