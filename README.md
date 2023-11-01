@@ -121,6 +121,6 @@ sampler LerpSampler
 	Filter=MIN_MAG_MIP_LINEAR;
 
 	AddressU = CLAMP;
-    AddressV = CLAMP;
+	AddressV = CLAMP;
 };
 ```
