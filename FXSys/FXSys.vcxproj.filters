@@ -1,0 +1,196 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Parser">
+      <UniqueIdentifier>{b57bbf57-a8be-4367-a5aa-b211806c4239}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="TokenGen">
+      <UniqueIdentifier>{92244543-fad1-44dd-8cc1-7913585ced18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc">
+      <UniqueIdentifier>{708d49bd-96f8-4a78-880f-39c7c709a817}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inl">
+      <UniqueIdentifier>{cd085f14-2ad8-4c3f-86dc-1b6566c8fbf5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="framework.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Parser\ExpParser.h">
+      <Filter>Parser</Filter>
+    </ClInclude>
+    <ClInclude Include="Parser\ParseHandler.h">
+      <Filter>Parser</Filter>
+    </ClInclude>
+    <ClInclude Include="Parser\PState.h">
+      <Filter>Parser</Filter>
+    </ClInclude>
+    <ClInclude Include="TokenGen\TokenHandler.h">
+      <Filter>TokenGen</Filter>
+    </ClInclude>
+    <ClInclude Include="TokenGen\TokenMan.h">
+      <Filter>TokenGen</Filter>
+    </ClInclude>
+    <ClInclude Include="TokenGen\TState.h">
+      <Filter>TokenGen</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Preprocessor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Expressions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ExpErrors.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="conststring.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ComValue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FileHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FXTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CodeDependence.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FXCode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Compile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ExpTag.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="FXSys.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Parser\ExpParser.cpp">
+      <Filter>Parser</Filter>
+    </ClCompile>
+    <ClCompile Include="Parser\ParseHandler.cpp">
+      <Filter>Parser</Filter>
+    </ClCompile>
+    <ClCompile Include="Parser\PState.cpp">
+      <Filter>Parser</Filter>
+    </ClCompile>
+    <ClCompile Include="TokenGen\TokenHandler.cpp">
+      <Filter>TokenGen</Filter>
+    </ClCompile>
+    <ClCompile Include="TokenGen\TokenMan.cpp">
+      <Filter>TokenGen</Filter>
+    </ClCompile>
+    <ClCompile Include="TokenGen\TState.cpp">
+      <Filter>TokenGen</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Preprocessor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Expressions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ExpErrors.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FileHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ComValue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CodeDependence.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FXCode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Compile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ExpTag.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PrepKW.inc">
+      <Filter>inc</Filter>
+    </None>
+    <None Include="PrepPragmas.inc">
+      <Filter>inc</Filter>
+    </None>
+    <None Include="lex.inl">
+      <Filter>inl</Filter>
+    </None>
+    <None Include="lex_macro.inl">
+      <Filter>inl</Filter>
+    </None>
+    <None Include="lex_prep.inl">
+      <Filter>inl</Filter>
+    </None>
+    <None Include="rules.inl">
+      <Filter>inl</Filter>
+    </None>
+    <None Include="Errors.inc">
+      <Filter>inc</Filter>
+    </None>
+    <None Include="Rules.inc">
+      <Filter>inc</Filter>
+    </None>
+    <None Include="Tokens.inc">
+      <Filter>inc</Filter>
+    </None>
+    <None Include="lex.dat">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="lex_macro.dat">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="lex_prep.dat">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="rules.dat">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="FXEnums.inc">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="ConstFunc.inc">
+      <Filter>Header Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="FXSys.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

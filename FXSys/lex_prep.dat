@@ -1,0 +1,42 @@
+{letters}=[a-zA-Z_]
+{letters_numbers}=[0-9a-zA-Z_]
+{numbers}=[0-9]
+{spaces}=['\x1'-'\x20' ^'\r''\n']
+{inv_chars}=['\x7e'-'\xff'@$`]
+{any_chars}=['\x1'-'\xff']
+{any_chars_linecom}=['\x1'-'\xff' ^'\n']
+{str_chars}=['\x1'-'\xff' ^'\r''\n''"']
+{file_str_chars}=['\x1'-'\xff' ^'\r''\n'>\]
+{rest_chars}=['!''%'-"'" '*''+' '-'-'?' '['-'^' '{'-'~' ^'\\']
+
+
+[ETN_INVALID]={inv_chars}+
+[nextline]='\\'('\n' | ('\r''\n'))
+[eof]='\x0'
+
+[ETN_PREP_DEFINED, defined]=defined
+
+
+[ETN_PREP_SPACE,' ']={spaces}+
+[ETN_PREP_ID]={letters}+{letters_numbers}*
+[ETN_PREP_VAARG,'...']='...'
+[ETN_PREP_COMMA, ,]=,
+[ETN_PREP_BRACEC_OPEN, '(']='('
+[ETN_PREP_BRACEC_CLOSE, ')']=')'
+[ETN_PREP_HASH,]='#'
+[ETN_PREP_DOUBLEHASH,]="##"
+[ETN_PREP_REST]={rest_chars}+
+[ETN_PREP_NEWLINE_STOP]='\n' | ('\r''\n')
+[ETN_PREP_SLASH,'\\']='\\'
+
+
+
+
+
+[ETN_PREP_STR,"string"]='"' {str_chars}* '"'
+[ETN_PREP_FILE_STR,"file"]='<' ({file_str_chars} | (\\))* '>'
+
+
+[line_comment]=// {any_chars_linecom}*
+[ETN_COMMENT_BLOCK]="/*" {any_chars}* | ("*/")^
+

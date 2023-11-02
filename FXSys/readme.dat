@@ -1,0 +1,3 @@
+To support CVM.rc, add reference to CVM.res into main project's "Additional Dependencies" Linker tab
+
+
