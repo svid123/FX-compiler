@@ -326,6 +326,7 @@ private:
 	virtual int getNextRuleID(const std::string &sRuleName)override;
 	virtual int getNextTokenID(const std::string &sStateName)override;
 
+	bool hasRule(SExpRuleState* aStatesStack, int nAllS, EXP_RULE r);
 
 	virtual void onSuccessRuleState(CPState *pTState,SExpRuleState *aStatesStack,int nAllS,int nStartTokenNum,int nAllT);
 	virtual void onSuccessRule(CPState *pTState,SExpRuleState *aStatesStack,int nAllS,int nTokenNumFirst,int nAllT);

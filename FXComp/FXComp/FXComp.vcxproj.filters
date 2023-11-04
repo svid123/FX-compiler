@@ -21,5 +21,6 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Bkgr.fx" />
+    <FxCompile Include="test.fx" />
   </ItemGroup>
 </Project>

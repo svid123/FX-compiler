@@ -1,6 +1,6 @@
 root=({any_root_sentence} | {exception_symbols})*[ETN_NONE]<
 
-any_root_sentence={var_func_definition} | {kw_typedef} | {static_attr} | {kw_struct} | {kw_enum} | {kw_cbuffer} | {kw_sampler} | {kw_rasterstate} | {kw_blendstate} | {kw_depthstencilstate} | {kw_technique} | {empty_sentence}
+any_root_sentence={var_func_definition} | {kw_typedef} | {static_attr} | {kw_enum} | {kw_cbuffer} | {kw_sampler} | {kw_rasterstate} | {kw_blendstate} | {kw_depthstencilstate} | {kw_technique} | {empty_sentence}
 
 empty_sentence=[ETN_SEMICOLON]
 any_sentence={block} | {sentence} | {empty_sentence}
@@ -39,14 +39,13 @@ template_expression=([ETN_ID, ETN_KW_SIGNED, ETN_KW_UNSIGNED, ETN_OP_PLUS-ETN_OP
 
 under_const_expr={kw_expression}
 
-kw_typedef=[ETN_KW_TYPEDEF] ({kw_struct} | ({arg_type} [ETN_ID] {array_dim}* [ETN_SEMICOLON]))
 
 var_func_definition={var_def} | {func_def}
-type=[ETN_KW_SIGNED,ETN_KW_UNSIGNED]? ([ETN_ID, ETN_KW_VOID]) ([ETN_OP_LESS] {template_expression} [ETN_OP_GATE])?
+type={kw_struct} | ([ETN_KW_SIGNED,ETN_KW_UNSIGNED]? ([ETN_ID, ETN_KW_VOID]) ([ETN_OP_LESS] {template_expression} [ETN_OP_GATE])?)
 arg_type=[ETN_KW_SIGNED,ETN_KW_UNSIGNED,ETN_KW_TRIANGLE-ETN_KW_POINT]? ([ETN_ID, ETN_KW_VOID, ETN_KW_SAMPLER, ETN_KW_SAMPLERSTATE, ETN_KW_SAMPLERCMPSTATE]) ([ETN_OP_LESS] {template_expression} [ETN_OP_GATE])?
 
 func_def={func_name} {block}
-func_name={type} [ETN_ID] [ETN_BRACEC_OPEN] {args}? [ETN_BRACEC_CLOSE] ([ETN_OP_ELSE] [ETN_ID])?
+func_name={var_qualified_type} [ETN_ID] [ETN_BRACEC_OPEN] {args}? [ETN_BRACEC_CLOSE] ([ETN_OP_ELSE] [ETN_ID])?
 
 init_expr={init_block} | {init_data}
 init_data=({init_braces} | {init_chars})+
@@ -57,10 +56,15 @@ init_block=[ETN_BLOCK_OPEN] ({init_expr} ([ETN_COMMA] {init_expr})*)? [ETN_BLOCK
 
 array_dim=[ETN_BRACES_OPEN] {kw_expression}? [ETN_BRACES_CLOSE]
 init_list=[ETN_OP_ASSIGN] ({init_block} | {init_data})
-register_def=[ETN_OP_ELSE] [ETN_KW_REGISTER] [ETN_BRACEC_OPEN] [ETN_ID] ([ETN_COMMA] [ETN_ID])? [ETN_BRACEC_CLOSE]
-var_def_id=[ETN_ID] {array_dim}* {register_def}? {init_list}?
+register_def=[ETN_KW_REGISTER] [ETN_BRACEC_OPEN] [ETN_ID] ([ETN_COMMA] [ETN_ID])? [ETN_BRACEC_CLOSE]
+semantic_def=[ETN_ID]
+var_def_id=[ETN_ID] {array_dim}* ([ETN_OP_ELSE] ({register_def} | {semantic_def}))? {init_list}?
 var_qualified_type=[ETN_KW_UNIFORM-ETN_KW_VOLATILE]* [ETN_KW_CONST-ETN_KW_COLMAJOR]* {type}
-var_def={var_qualified_type}  {var_def_id} ([ETN_COMMA] {var_def_id})* [ETN_SEMICOLON]
+id_def={var_qualified_type}  ({var_def_id} ([ETN_COMMA] {var_def_id})*)?
+id_def_strict={var_qualified_type}  {var_def_id} ([ETN_COMMA] {var_def_id})*
+var_def= {id_def} [ETN_SEMICOLON]
+
+kw_typedef=[ETN_KW_TYPEDEF] {id_def_strict} [ETN_SEMICOLON]
 
 
 arg_expression=({arg_expr_block} | {arg_expr_chars_no_comma})+
@@ -102,14 +106,14 @@ kw_enum=[ETN_KW_ENUM][ETN_ID][ETN_BLOCK_OPEN]	{enum_def} ([ETN_COMMA]{enum_def})
 
 ;****** struct ******
 struct_var=[ETN_ID] {array_dim}*
-struct_definition=[ETN_KW_LINEAR-ETN_KW_SAMPLE]* {type} {struct_var} ([ETN_COMMA] {struct_var})* ([ETN_OP_ELSE] [ETN_ID])? [ETN_SEMICOLON]
+struct_definition=[ETN_KW_LINEAR-ETN_KW_SAMPLE]* {id_def_strict} [ETN_SEMICOLON]
 
-kw_struct=[ETN_KW_STRUCT] [ETN_ID]? [ETN_BLOCK_OPEN] {struct_definition}+ [ETN_BLOCK_CLOSE] ([ETN_ID] {array_dim}*)? [ETN_SEMICOLON]
+kw_struct=[ETN_KW_STRUCT] [ETN_ID]? [ETN_BLOCK_OPEN] {struct_definition}+ [ETN_BLOCK_CLOSE]
 
 numbers=[ETN_CONST_INT,ETN_CONST_FLOAT,ETN_CONST_DOUBLE]
 
 ;****** cbuffer ******
-kw_cbuffer=[ETN_KW_CBUFFER] [ETN_ID] {register_def}? [ETN_BLOCK_OPEN] ({var_def} | {kw_struct} | {empty_sentence})+ [ETN_BLOCK_CLOSE]
+kw_cbuffer=[ETN_KW_CBUFFER] [ETN_ID] {register_def}? [ETN_BLOCK_OPEN] ({var_def} | {empty_sentence})+ [ETN_BLOCK_CLOSE]
 
 
 

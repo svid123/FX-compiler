@@ -864,7 +864,7 @@ bool CExpCompiler::Compile(const char *sFileName,const char *_sDir,SFXCode &rDes
 			InsertKeptDirectives();
 
 			std::string sName=sFileName,sSourceName;
-			bool bRes=false;
+			bool bRes=true;
 			std::map<std::string,std::string> mDefaultMacros;
 
 			sName=sName.substr((int)sName.rfind('\\')+1);
@@ -1848,6 +1848,15 @@ void CExpCompiler::onSuccessRule(CPState *pState,SExpRuleState *aStatesStack,int
 		m_nFirstAttributeOutLine=-1;
 }
 
+bool CExpCompiler::hasRule(SExpRuleState* aStatesStack, int nAllS, EXP_RULE r)
+{
+	while (nAllS-->0)
+	if (aStatesStack[nAllS].pRule->getID()==r)
+		return true;
+
+	return false;
+}
+
 bool CExpCompiler::onErrorRule(CPState *pTState,SExpRuleState *aStatesStack,int nAllS,int nTokenNum,bool bProcessed)
 {
 	bool bErr=true;
@@ -1861,23 +1870,25 @@ bool CExpCompiler::onErrorRule(CPState *pTState,SExpRuleState *aStatesStack,int 
 
 	switch (expRule)
 	{
-		case ERULE_var_def:if (pCurRS->nState==1)
+		case ERULE_var_def://if (hasRule(aStatesStack, nAllS, ERULE_var_def))
 						{
-							EndGlobalVar();
-							return false;	//Not a error on #1 state
-						}
-						else
-						if (pCurRS->nState==3)
-						{
-							if (pErrT->T!=ETN_BRACEC_OPEN)	//Error when we get anything else than function definition '('
+							if (pCurRS->nState == 1)
 							{
-								Error(EERR_CHAR_EXPECTED_FOUND_TOKEN,(char *)'(',(char *)pErrT);
-								return true;
+								EndGlobalVar();
+								return false;	//Not a error on #1 state
 							}
+							/*else
+								if (pCurRS->nState == 3)
+								{
+									if (pErrT->T != ETN_BRACEC_OPEN)	//Error when we get anything else than function definition '('
+									{
+										Error(EERR_CHAR_EXPECTED_FOUND_TOKEN, (char*)'(', (char*)pErrT);
+										return true;
+									}
 
-							EndGlobalVar();
+									EndGlobalVar();
+								}*/
 						}
-
 						return false;
 			break;
 
