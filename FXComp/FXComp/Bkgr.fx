@@ -1,3 +1,4 @@
+
 #define def(a,...) a=__VA_ARGS__
 
 float F=10;
@@ -108,7 +109,7 @@ struct VS_OUT
 	float4 vColor:COLOR0;
 };
 
-#include "test.inc"
+
 
 groupshared float4 arr[16*10];
 
@@ -149,6 +150,26 @@ struct PS_OUTPUT
     float4 cOut : SV_Target0;  // Pixel color
 };
 
+
+PS_OUTPUT PixOutRestore(VS_OUT In)
+{ 
+    PS_OUTPUT Out;
+
+	Out.cOut=g_tDiffTexture[1].Sample(LerpSampler, In.vT0);
+
+	if (g_vSettings.y!=1.0f)
+		Out.cOut.rgb=pow(Out.cOut.rgb,g_vSettings.y);
+
+	Out.cOut*=In.vColor;
+
+	if (Out.cOut.a==0.0f)
+		discard;
+	else
+		Out.cOut.rgb/=Out.cOut.a;
+
+    return Out;
+}
+
 PS_OUTPUT PixOut(VS_OUT In)
 { 
     PS_OUTPUT Out;	
@@ -177,28 +198,10 @@ PS_OUTPUT PixOut(VS_OUT In)
 		Out.cOut.a=In.vColor.a;
 
 //	Out.cOut.rgb*=g_Buf.Load(0).rgb;
-
+	
     return Out;
 }
 
-PS_OUTPUT PixOutRestore(VS_OUT In)
-{ 
-    PS_OUTPUT Out;
-
-	Out.cOut=g_tDiffTexture[1].Sample(LerpSampler, In.vT0);
-
-	if (g_vSettings.y!=1.0f)
-		Out.cOut.rgb=pow(Out.cOut.rgb,g_vSettings.y);
-
-	Out.cOut*=In.vColor;
-
-	if (Out.cOut.a==0.0f)
-		discard;
-	else
-		Out.cOut.rgb/=Out.cOut.a;
-
-    return Out;
-}
 
 DepthStencilState DSS_NoZWriteGreater
 {
@@ -245,8 +248,8 @@ technique T0
 		//DefRange(range,1,3);
 
 
-		SetVertexShader(60, VertOut);
-		SetPixelShader(60, PixOut);
+		//SetVertexShader(50, VertOut);
+		SetPixelShader(50, PixOut);
     }
 /*
     pass P1	//Draw less, don't change Z
