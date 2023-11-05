@@ -88,7 +88,7 @@ class CExpCompiler:		public CParseHandler,public CFileHandler,CConstProvider
 
 	struct SConstVector
 	{
-		CVectorType *pType;
+		const CVectorType *pType;
 		SComValue aVals[4*4];	//For maximum matrix4x4 storage
 	};
 
@@ -172,15 +172,7 @@ private:
 	static TMNamedRules m_mNamedRules;
 
 	//typedef std::unordered_map<std::string,std::pair<int,TExpLine>> TMExpScopeVars;
-	enum TYPE_QUALIFIERS_BIT
-	{
-		TQB_STATIC=0,
-		TQB_CONST,
-		TQB_VOLATILE,
-		TQB_UNIFORM,
 
-		TQB_SIZE
-	};
 
 	struct SScopeDesc
 	{
@@ -222,9 +214,11 @@ private:
 	EXP_TOKEN m_tLastStopKeyword;
 
 //Type ID definition
-	CBaseType *m_pGlobalIDType;
+	PBaseType m_pGlobalIDBaseType;
 	std::vector<int> m_anIDDimSizes;
 	std::string m_sNewGlobalID;
+	PBaseType m_pGlobalIDType;
+	bool m_bParseIDInit;
 
 //Global vars initializers
 	int m_nCurrentGlobalVarInitDim;
@@ -341,7 +335,6 @@ private:
 
 	void SetTypeQualifier(TToken *pToken);
 	void AddGlobalVarInitData(TToken *aTokens,int nAllT);
-	//void SetGlobalVarZeroData(int nStartDimensionLevel);
 	void AddNewInitedVar();
 	bool ReadConstVector(TToken *aTokens,int nAllT,SConstVector &rDest);
 

@@ -10,6 +10,16 @@
 class CBaseType;
 
 typedef std::shared_ptr<CBaseType> PBaseType;
+enum TYPE_QUALIFIERS_BIT
+{
+	TQB_STATIC=0,
+	TQB_CONST,
+	TQB_VOLATILE,
+	TQB_UNIFORM,
+	TQB_EXTERN,
+
+	TQB_SIZE
+};
 
 class CBaseType
 {
@@ -34,7 +44,7 @@ public:
 		return m_pBase;
 	}
 
-	const std::string &GetName(){return m_sName;}
+	const std::string &GetName()const{return m_sName;}
 
 	virtual bool IsSame(const CBaseType *pSrc) const
 	{
@@ -47,7 +57,7 @@ public:
 		return true;
 	}
 
-	virtual const CBaseType *Unroll(std::vector<int> *panRetDimSize=0) const=0;
+	virtual const CBaseType *Unroll(std::vector<int> *panRetDimSize=0,unsigned int *puTypeQualifiers=0) const=0;
 };
 
 class CVectorType:	public CBaseType
@@ -82,8 +92,11 @@ public:
 		return false;
 	}
 
-	virtual const CBaseType *Unroll(std::vector<int> *panRetDimSize=0) const override
+	virtual const CBaseType *Unroll(std::vector<int> *panRetDimSize=0,unsigned int *puTypeQualifiers=0) const override
 	{
+		if (puTypeQualifiers)
+			*puTypeQualifiers=0;
+
 		if (panRetDimSize)
 		{
 			panRetDimSize->clear();
@@ -99,8 +112,10 @@ class CTypedef:	public CBaseType
 	typedef std::vector<int> TADimSize;
 
 	TADimSize m_anDimSize;
+	unsigned int m_uTypeQualifiers;
 public:
-	CTypedef(const char *sname,PBaseType pBase):CBaseType(sname,pBase)
+	CTypedef(const char *sname,PBaseType pBase,unsigned int uTypeQ=0):CBaseType(sname,pBase),
+				m_uTypeQualifiers(uTypeQ)
 	{
 	}
 
@@ -112,6 +127,11 @@ public:
 	const TADimSize &GetDims() const
 	{
 		return m_anDimSize;
+	}
+
+	unsigned int GetTypeQualifiers()
+	{
+		return m_uTypeQualifiers;
 	}
 
 	virtual bool IsSame(const CBaseType *pSrc) const override
@@ -127,9 +147,12 @@ public:
 		return false;
 	}
 
-	virtual const CBaseType *Unroll(std::vector<int> *panRetDimSize=0) const override
+	virtual const CBaseType *Unroll(std::vector<int> *panRetDimSize=0,unsigned int *puTypeQualifiers=0) const override
 	{
 		const CBaseType *pRet=0,*pT=this;
+
+		if (puTypeQualifiers)
+			*puTypeQualifiers=0;
 
 		if (panRetDimSize)
 			panRetDimSize->clear();
@@ -137,10 +160,16 @@ public:
 		while (pT)
 		{
 			const CTypedef *pTD=dynamic_cast<const CTypedef *>(pT);
-			if (pTD && panRetDimSize)
+			if (pTD)
 			{
-				for (int n=(int)pTD->m_anDimSize.size()-1;n>=0;--n)
-					panRetDimSize->insert(panRetDimSize->begin(),pTD->m_anDimSize[n]);
+				if (puTypeQualifiers)
+					*puTypeQualifiers|=pTD->m_uTypeQualifiers;
+
+				if (panRetDimSize)
+				{
+					for (int nSZ:	pTD->m_anDimSize)
+						panRetDimSize->push_back(nSZ);
+				}
 			}
 
 			pRet=pT;

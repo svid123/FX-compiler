@@ -60,7 +60,7 @@ semantic_def=[ETN_ID]
 
 define_id=[ETN_ID] {array_dim}* ([ETN_OP_ELSE] ({register_def} | {semantic_def}))?
 type={kw_struct} | ([ETN_KW_SIGNED,ETN_KW_UNSIGNED]? ([ETN_ID, ETN_KW_VOID]) ([ETN_OP_LESS] {template_expression} [ETN_OP_GATE])?)
-var_qualified_type=[ETN_KW_UNIFORM-ETN_KW_VOLATILE]* [ETN_KW_CONST-ETN_KW_COLMAJOR]* {type}
+var_qualified_type=[ETN_KW_UNIFORM-ETN_KW_VOLATILE, ETN_KW_CONST-ETN_KW_COLMAJOR]* {type}
 id_def={var_qualified_type}  (({define_id} {init_list}?) ([ETN_COMMA] ({define_id} {init_list}?))*)?
 id_def_strict={var_qualified_type}  {define_id} ([ETN_COMMA] {define_id})*
 var_def= {id_def} [ETN_SEMICOLON]
@@ -114,7 +114,7 @@ kw_struct=[ETN_KW_STRUCT] [ETN_ID]? [ETN_BLOCK_OPEN] {struct_definition}+ [ETN_B
 numbers=[ETN_CONST_INT,ETN_CONST_FLOAT,ETN_CONST_DOUBLE]
 
 ;****** cbuffer ******
-kw_cbuffer=[ETN_KW_CBUFFER] [ETN_ID] {register_def}? [ETN_BLOCK_OPEN] ({var_def} | {empty_sentence})+ [ETN_BLOCK_CLOSE]
+kw_cbuffer=[ETN_KW_CBUFFER] [ETN_ID] {register_def}? [ETN_BLOCK_OPEN] ({var_def} | {kw_typedef} | {empty_sentence})+ [ETN_BLOCK_CLOSE]
 
 
 
@@ -155,5 +155,6 @@ kw_pass=[ETN_KW_PASS] [ETN_ID] [ETN_BLOCK_OPEN] ({pass_definition} [ETN_SEMICOLO
 
 ;****** technique ******
 kw_technique=[ETN_KW_TECH] [ETN_ID] [ETN_BLOCK_OPEN] {kw_pass}+ [ETN_BLOCK_CLOSE]
+
 
 
