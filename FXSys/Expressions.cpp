@@ -1652,7 +1652,8 @@ void CExpCompiler::onSuccessRule(CPState *pState,SExpRuleState *aStatesStack,int
 	switch (expRule)
 	{
 		case ERULE_define_id:EndIDDef();
-							if (m_pGlobalIDBaseType && HasRule(aStatesStack,nAllS,ERULE_kw_typedef))
+							if (m_pGlobalIDBaseType && HasRule(aStatesStack,nAllS,ERULE_kw_typedef) &&
+								!HasRule(aStatesStack,nAllS,ERULE_struct_definition))
 								DefineNewTypeID(pFirstT,nAllT);
 				break;
 

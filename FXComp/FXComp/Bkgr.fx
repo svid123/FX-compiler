@@ -1,3 +1,9 @@
+typedef int T;
+
+struct
+{
+	T a;
+}TStr;
 
 typedef float3 TArrayFloats0[2];
 typedef TArrayFloats0 TArrayFloats[3];
