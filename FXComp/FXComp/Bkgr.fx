@@ -1,7 +1,9 @@
 typedef int T;
 
-struct
+struct SS
 {
+
+
 	T a;
 }TStr;
 
