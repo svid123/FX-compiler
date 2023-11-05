@@ -35,7 +35,7 @@
 
 size_t CExpCompiler::m_hInst=0;
 CExpCompiler::TMNamedRules CExpCompiler::m_mNamedRules;
-std::map<std::string,CExpCompiler::SPrimitiveType> CExpCompiler::m_mPrimTypes;
+std::map<std::string,PBaseType> CExpCompiler::m_mPrimTypes;
 
 CExpCompiler::TMConstFunc CExpCompiler::m_mOpFunc;
 
@@ -375,7 +375,7 @@ CExpCompiler::CExpCompiler(const char *sLogFileName)
 #undef DEF_ERULE
 	}
 
-	CreatePrimitiveTypes();
+	
 
 
 	m_pPreprocessor=new CPreprocessor(this);
@@ -753,6 +753,8 @@ bool CExpCompiler::Compile(const char *sFileName,const char *_sDir,SFXCode &rDes
 {
 	std::string sDir(_sDir?_sDir:"");
 	
+	CreatePrimitiveTypes();
+
 	m_tLastStopKeyword=ETN_NONE;
 	m_nLastErrorLine=0;
 	m_nBlockErrorRuleLn=-1;
@@ -1380,26 +1382,26 @@ void CExpCompiler::onSuccessRuleState(CPState *pState,SExpRuleState *aStatesStac
 								if (m_nCurrentVarAttr)
 									m_pOutStream->mVarsAttrs[pFirstT->sText]=m_nCurrentVarAttr;
 								
-								EndGlobalVar();
+								//EndIDDef();
 							}
 				break;
 
-		case ERULE_var_def_id:if (pCurRS->nState==0)
+		case ERULE_define_id:if (pCurRS->nState==0)
 							{
 								if (m_aScopes.size()>1)
-									m_sNewGlobalVar="";
+									m_sNewGlobalID="";
 								else
-									BeginGlobalVar(pFirstT);
+									BeginIDDef(pFirstT);
 							}
 				break;
 
-		case ERULE_init_list:if (m_sNewGlobalVar.length())
+		case ERULE_init_list:if (m_sNewGlobalID.length() && m_bParseIDInit)
 							{
 #ifdef MUTE_GLOBAL_INITIALIZERS
 								if (pCurRS->nState==0)
 								{
 			/*char p[256];
-			sprintf_s(p,"IGNORE: %s\n",m_sNewGlobalVar.c_str());
+			sprintf_s(p,"IGNORE: %s\n",m_sNewGlobalID.c_str());
 			OutputDebugStringA(p);*/
 
 									m_aIgnoreWriteTokens.emplace_back(std::make_pair(pFirstT,pFirstT));
@@ -1413,13 +1415,28 @@ void CExpCompiler::onSuccessRuleState(CPState *pState,SExpRuleState *aStatesStac
 							}
 				break;
 
-		case ERULE_init_block:if (m_sNewGlobalVar.length())
+		case ERULE_init_block:if (m_sNewGlobalID.length() && m_bParseIDInit)
 							{
-								if (!m_anVarSizes.size())
+								if (!m_anVarPointers.size())
 								{
-									m_anVarSizes.push_back(1);
-									m_anVarPointers.push_back(0);
-									m_aVarInitItems.resize(1);
+									std::vector<int> anDimSizes;
+									m_pGlobalIDType->Unroll(&anDimSizes);
+
+									if (!anDimSizes.size())
+									{
+										m_anVarPointers.push_back(0);
+										m_aVarInitItems.resize(1);
+									}
+									else								
+									{
+										m_anVarPointers.resize(anDimSizes.size());
+
+										int nSize=1;
+										for (int sz:	anDimSizes)
+											nSize*=sz;
+
+										m_aVarInitItems.resize(nSize);
+									}
 								}
 
 
@@ -1430,7 +1447,7 @@ void CExpCompiler::onSuccessRuleState(CPState *pState,SExpRuleState *aStatesStac
 									if ((size_t)m_nCurrentGlobalVarInitDim<m_anVarPointers.size())
 										m_anVarPointers[m_nCurrentGlobalVarInitDim]=0;
 									else
-										Error(EERR_TOO_MANY_INIT,m_sNewGlobalVar.c_str());
+										Error(EERR_TOO_MANY_INIT,m_sNewGlobalID.c_str());
 								}
 								else
 								if (pCurRS->nState==2)
@@ -1445,16 +1462,18 @@ void CExpCompiler::onSuccessRuleState(CPState *pState,SExpRuleState *aStatesStac
 							}
 				break;
 
-		case ERULE_var_qualified_type:if (m_aScopes.size()==1)
+		case ERULE_var_qualified_type:if (m_aScopes.size()==1)	//Only in global scope
 									{
-										if (pCurRS->nState==0 || pCurRS->nState==1)
+										if (pCurRS->nState==0)
 										{
 											SetTypeQualifier(pFirstT);
 										}
 										else
-										if (pCurRS->nState==2)
-											SetGlobalVarType(pFirstT,nAllT);
+										if (pCurRS->nState==1)
+											SetGlobalIDType(pFirstT,nAllT);
 									}
+									else
+										m_pGlobalIDBaseType=0;
 				break;
 				
 		case ERULE_kw_enum:if (pCurRS->nState==1)
@@ -1632,7 +1651,9 @@ void CExpCompiler::onSuccessRule(CPState *pState,SExpRuleState *aStatesStack,int
 
 	switch (expRule)
 	{
-		case ERULE_var_def:EndGlobalVar();
+		case ERULE_define_id:EndIDDef();
+							if (m_pGlobalIDBaseType && HasRule(aStatesStack,nAllS,ERULE_kw_typedef))
+								DefineNewTypeID(pFirstT,nAllT);
 				break;
 
 		case ERULE_enum_def:if (m_sNewEnum.length())
@@ -1677,21 +1698,12 @@ void CExpCompiler::onSuccessRule(CPState *pState,SExpRuleState *aStatesStack,int
 		case ERULE_rs_definition:SetRSVar(pFirstT,nAllT);
 				break;
 
-		case ERULE_array_dim:if (m_sNewGlobalVar.length())
+		case ERULE_array_dim:if (m_sNewGlobalID.length())
 							{
 								if (nAllT>2)
-								{
-									m_anVarSizes.push_back((int)ParseConstExpression(pFirstT+1,nAllT-2,this));
-									m_anVarPointers.push_back(0);
-
-									int nSize=1;
-									for (int sz:	m_anVarSizes)
-										nSize*=sz;
-
-									m_aVarInitItems.resize(nSize);
-								}
+									m_anIDDimSizes.push_back((int)ParseConstExpression(pFirstT+1,nAllT-2,this));
 								else
-									Error(EERR_ARRAY,m_sNewGlobalVar.c_str(),0);
+									Error(EERR_ARRAY,m_sNewGlobalID.c_str(),0);
 							}
 				break;
 
@@ -1766,7 +1778,10 @@ void CExpCompiler::onSuccessRule(CPState *pState,SExpRuleState *aStatesStack,int
 								WriteTokens(pFirstT,nAllT);
 				break;
 
-		case ERULE_kw_typedef:
+		case ERULE_kw_typedef:if (m_aScopes.size()==1 && nAllS<=3)
+								WriteTokens(pFirstT,nAllT);
+				break;
+
 		case ERULE_static_attr:if (m_aScopes.size()==1)
 							{
 								if (!CustomAttr(pFirstT,nAllT))
@@ -1793,14 +1808,29 @@ void CExpCompiler::onSuccessRule(CPState *pState,SExpRuleState *aStatesStack,int
 		case ERULE_kw_default:
 			break;
 
-		case ERULE_init_data:if (m_sNewGlobalVar.length())
+		case ERULE_init_data:if (m_sNewGlobalID.length() && m_bParseIDInit)
 							{
-								if (!m_anVarSizes.size())
+								std::vector<int> anDimSizes;
+								m_pGlobalIDType->Unroll(&anDimSizes);
+
+								if (!anDimSizes.size() && !m_anVarPointers.size())
 								{
-									m_anVarSizes.push_back(1);
 									m_anVarPointers.push_back(0);
 									m_aVarInitItems.resize(1);
 								}
+								/*
+								else
+								if (!m_anVarPointers.size())	// ???, Possible not necessary since init data arrays without init_block is impossible
+								{
+									m_anVarPointers.resize(m_anIDDimSizes.size());
+
+									int nSize=1;
+									for (int sz:	m_anIDDimSizes)
+										nSize*=sz;
+
+									m_aVarInitItems.resize(nSize);
+								}
+								*/
 
 								AddGlobalVarInitData(pFirstT,nAllT);
 							}
@@ -1811,8 +1841,8 @@ void CExpCompiler::onSuccessRule(CPState *pState,SExpRuleState *aStatesStack,int
 							}
 			break;
 
-		case ERULE_init_list:if (m_sNewGlobalVar.length())
-								AddNewGlobalVar();
+		case ERULE_init_list:if (m_sNewGlobalID.length() && m_bParseIDInit)
+								AddNewInitedVar();
 			break;
 
 		//case ERULE_init_single:
@@ -1848,7 +1878,7 @@ void CExpCompiler::onSuccessRule(CPState *pState,SExpRuleState *aStatesStack,int
 		m_nFirstAttributeOutLine=-1;
 }
 
-bool CExpCompiler::hasRule(SExpRuleState* aStatesStack, int nAllS, EXP_RULE r)
+bool CExpCompiler::HasRule(SExpRuleState* aStatesStack, int nAllS, EXP_RULE r)
 {
 	while (nAllS-->0)
 	if (aStatesStack[nAllS].pRule->getID()==r)
@@ -1874,7 +1904,7 @@ bool CExpCompiler::onErrorRule(CPState *pTState,SExpRuleState *aStatesStack,int 
 						{
 							if (pCurRS->nState == 1)
 							{
-								EndGlobalVar();
+								EndIDDef();
 								return false;	//Not a error on #1 state
 							}
 							/*else
@@ -1886,7 +1916,7 @@ bool CExpCompiler::onErrorRule(CPState *pTState,SExpRuleState *aStatesStack,int 
 										return true;
 									}
 
-									EndGlobalVar();
+									EndIDDef();
 								}*/
 						}
 						return false;
@@ -1982,6 +2012,8 @@ void CExpCompiler::SetTypeQualifier(TToken *pToken)
 		mTQ[ETN_KW_CONST]=TQB_CONST;
 		mTQ[ETN_KW_VOLATILE]=TQB_VOLATILE;
 		mTQ[ETN_KW_UNIFORM]=TQB_UNIFORM;
+		mTQ[ETN_KW_EXTERN]=TQB_EXTERN;
+
 
 		_ASSERTE(mTQ.size()==TQB_SIZE);
 	}
@@ -1991,7 +2023,7 @@ void CExpCompiler::SetTypeQualifier(TToken *pToken)
 		m_uGlobalVarQualifier|=1<<it->second;
 }
 
-void CExpCompiler::SetGlobalVarType(TToken *aTokens,int nAllT)
+void CExpCompiler::SetGlobalIDType(TToken *aTokens,int nAllT)
 {
 	int n=0;
 	bool bUnsigned=false;
@@ -2004,35 +2036,49 @@ void CExpCompiler::SetGlobalVarType(TToken *aTokens,int nAllT)
 		n++;
 	}
 
-	if (n<nAllT && aTokens[n].sText)
-	{
-		auto it=m_mPrimTypes.find(aTokens[n].sText);
-
-		if (it!=m_mPrimTypes.end())
-			m_pGlobalVarType=&it->second;
-		else
-			m_pGlobalVarType=0;
-	}
+	if (n<nAllT && aTokens[n].sText)	//Not a struct
+		m_pGlobalIDBaseType=FindType(aTokens[n].sText);
 	else
-		m_pGlobalVarType=0;
+		m_pGlobalIDBaseType=0;
 }
 
-void CExpCompiler::EndGlobalVar()
+void CExpCompiler::EndIDDef()
 {
-	m_sNewGlobalVar="";
+	if (m_sNewGlobalID.length() && m_pGlobalIDBaseType)
+	{
+		CTypedef *pT=new CTypedef(m_sNewGlobalID.c_str(),m_pGlobalIDBaseType,m_uGlobalVarQualifier);
+		if (m_anIDDimSizes.size())
+		{
+			for (int n:	m_anIDDimSizes)
+				pT->AddDimSize(n);
+		}
+
+		m_pGlobalIDType=PBaseType(pT);
+
+		unsigned int uTQ=0;
+		pT->Unroll(0,&uTQ);
+		m_bParseIDInit=(uTQ & (TQB_STATIC | TQB_CONST))!=(TQB_STATIC | TQB_CONST);
+	}
+	else
+		m_pGlobalIDType=0;
+	
+
+	//m_sNewGlobalID="";
 	m_uGlobalVarQualifier=0;
 	m_nCurrentVarAttr=0;
 }
 
-void CExpCompiler::BeginGlobalVar(TToken *pToken)
+void CExpCompiler::BeginIDDef(TToken *pToken)
 {
-	m_sNewGlobalVar="";
+	m_sNewGlobalID="";
+	m_pGlobalIDType=0;
+	m_bParseIDInit=true;
 
-	if (m_pGlobalVarType && (m_uGlobalVarQualifier & (TQB_STATIC | TQB_CONST))!=(TQB_STATIC | TQB_CONST))
+	if (m_pGlobalIDBaseType)
 	{
-		m_sNewGlobalVar=pToken->sText;
+		m_sNewGlobalID=pToken->sText;
 
-		m_anVarSizes.clear();
+		m_anIDDimSizes.clear();
 		m_anVarPointers.clear();
 		m_aVarInitItems.clear();
 		m_nCurrentGlobalVarInitDim=-1;
@@ -2042,13 +2088,22 @@ void CExpCompiler::BeginGlobalVar(TToken *pToken)
 		m_pOutStream->mVarsAttrs[pToken->sText]=m_nCurrentVarAttr;
 }
 
-void CExpCompiler::AddNewGlobalVar()
+void CExpCompiler::DefineNewTypeID(TToken *aTokens,int nAllT)
+{
+	if (m_pGlobalIDType)
+	{
+		m_mTypes.emplace(m_sNewGlobalID,m_pGlobalIDType);
+	}
+}
+
+void CExpCompiler::AddNewInitedVar()
 {
 	const int nAlignment=16;
-	CV_TYPE Type=CV_TYPE(m_pGlobalVarType->Type & CV_TYPE_MASK);
+	const CVectorType *pVT=dynamic_cast<const CVectorType *>(m_pGlobalIDType->Unroll());
+	CV_TYPE Type=CV_TYPE(pVT->GetType() & CV_TYPE_MASK);
 	int nItemSize=(Type==CV_DOUBLE?8:4),nXStride;
-	int nDimsY=max(m_pGlobalVarType->nDimsY,1);
-	int nDimsX=max(m_pGlobalVarType->nDimsX,1);
+	int nDimsY=max(pVT->GetDimsY(),1);
+	int nDimsX=max(pVT->GetDimsX(),1);
 	std::vector<unsigned char> aBuf;
 	int ptr=0;
 
@@ -2088,64 +2143,47 @@ void CExpCompiler::AddNewGlobalVar()
 		}
 	}
 
-	_ASSERTE(m_pOutStream->mVarsInitData.find(m_sNewGlobalVar)==m_pOutStream->mVarsInitData.end());
-	m_pOutStream->mVarsInitData[m_sNewGlobalVar]=aBuf;
+	_ASSERTE(m_pOutStream->mVarsInitData.find(m_sNewGlobalID)==m_pOutStream->mVarsInitData.end());
+	m_pOutStream->mVarsInitData[m_sNewGlobalID]=aBuf;
 	
-	m_sNewGlobalVar="";
+	m_sNewGlobalID="";
 }
 
-/*
-void CExpCompiler::SetGlobalVarZeroData(int nStartDimensionLevel)
-{
-	int ptr=0;
-	int stride=1;
-
-	_ASSERTE(m_pGlobalVarType);
-
-	for (size_t n=0;n<m_anVarPointers.size();++n)
-	if (m_anVarPointers[n]>=m_anVarSizes[n])
-	{
-		Error(EERR_TOO_MANY_INIT,m_sNewGlobalVar.c_str());
-		return;
-	}
-
-
-	for (int n=(int)m_anVarSizes.size()-1;n>=0;--n)
-	{
-		if (n<=nStartDimensionLevel)
-			ptr+=m_anVarPointers[n]*stride;
-		stride*=m_anVarSizes[n];
-	}
-}
-*/
 
 void CExpCompiler::AddGlobalVarInitData(TToken *aTokens,int nAllT)
 {
 	int ptr=0;
 	int stride=1;
+	std::vector<int> anIDDimSizes;
+	const CBaseType *pBaseType;
 
-	_ASSERTE(m_pGlobalVarType);
+	_ASSERTE(m_pGlobalIDType);
+	pBaseType=m_pGlobalIDType->Unroll(&anIDDimSizes);
+
+	if (!anIDDimSizes.size())
+		anIDDimSizes.push_back(1);
 
 	for (size_t n=0;n<m_anVarPointers.size();++n)
-	if (m_anVarPointers[n]>=m_anVarSizes[n])
+	if (m_anVarPointers[n]>=anIDDimSizes[n])
 	{
-		Error(EERR_TOO_MANY_INIT,m_sNewGlobalVar.c_str());
+		Error(EERR_TOO_MANY_INIT,m_sNewGlobalID.c_str());
 		return;
 	}
 
 
-	for (int n=(int)m_anVarSizes.size()-1;n>=0;--n)
+	for (int n=(int)anIDDimSizes.size()-1;n>=0;--n)
 	{
 		ptr+=m_anVarPointers[n]*stride;
-		stride*=m_anVarSizes[n];
+		stride*=anIDDimSizes[n];
 	}
 	
 	SConstVector &rCV=m_aVarInitItems[ptr];
 	SConstVector cv;
 	if (ReadConstVector(aTokens,nAllT,cv))
 	{
-		int nAllVals=max(m_pGlobalVarType->nDimsX,1)*max(m_pGlobalVarType->nDimsY,1);
-		int nSrcValsNumber=max(cv.pType->nDimsX,1)*max(cv.pType->nDimsY,1);
+		const CVectorType *pVT=dynamic_cast<const CVectorType *>(m_pGlobalIDType->Unroll());
+		int nAllVals=max(pVT->GetDimsX(),1)*max(pVT->GetDimsY(),1);
+		int nSrcValsNumber=max(cv.pType->GetDimsX(),1)*max(cv.pType->GetDimsY(),1);
 	
 		rCV.pType=cv.pType;
 
@@ -2161,7 +2199,7 @@ void CExpCompiler::AddGlobalVarInitData(TToken *aTokens,int nAllT)
 				rCV.aVals[n]=cv.aVals[n];
 		}
 		else
-			Error(EERR_TYPE_MISMATCH,cv.pType->sName.c_str(),m_pGlobalVarType->sName.c_str());
+			Error(EERR_TYPE_MISMATCH,cv.pType->GetName().c_str(),m_pGlobalIDBaseType->GetName().c_str());
 	}
 
 
@@ -2170,16 +2208,27 @@ void CExpCompiler::AddGlobalVarInitData(TToken *aTokens,int nAllT)
 
 bool CExpCompiler::ReadConstVector(TToken *aTokens,int nAllT,SConstVector &rDest)
 {
-	SPrimitiveType *pType=0;
+	PBaseType pBaseType;
+	const CVectorType *pType=0;
 	bool bRet=true;
+	std::vector<int> anDimSizes;
+	int nTotalSize=1;
 
-	if (aTokens[0].sText)
+	pBaseType=FindType(aTokens[0].sText);
+		
+	pType=dynamic_cast<const CVectorType *>(pBaseType.get());
+	if (!pType && pBaseType)
+		pType=dynamic_cast<const CVectorType *>(pBaseType->Unroll(&anDimSizes));
+
+	for (int nSZ:	anDimSizes)
+		nTotalSize*=nSZ;
+
+	if (nTotalSize>1)
 	{
-		auto it=m_mPrimTypes.find(aTokens[0].sText);
-		if (it!=m_mPrimTypes.end())
-			pType=&it->second;
+		Error(EERR_WRONG_INIT_TYPE,aTokens[0].sText);
+		bRet=false;
 	}
-
+	else
 	if (!pType)
 	{
 		SComValue &cv=rDest.aVals[0];
@@ -2191,20 +2240,20 @@ bool CExpCompiler::ReadConstVector(TToken *aTokens,int nAllT,SConstVector &rDest
 			case CV_NULL:
 			case CV_CHAR:
 			case CV_SHORT:
-			case CV_INT:pType=(cv.uType & CV_UNSIGNED)?&m_mPrimTypes["uint"]:&m_mPrimTypes["int"];
+			case CV_INT:pType=(CVectorType *)((cv.uType & CV_UNSIGNED)?m_mPrimTypes["uint"].get():m_mPrimTypes["int"].get());
 				break;
 
-			case CV_DOUBLE:pType=&m_mPrimTypes["double"];
+			case CV_DOUBLE:pType=(CVectorType *)m_mPrimTypes["double"].get();
 				break;
 
-			default:pType=&m_mPrimTypes["float"];
+			default:pType=(CVectorType *)m_mPrimTypes["float"].get();
 		}
 	}
 	else
 	{
 		int ptr=1;
 		int cnt=0;
-		int nMaxVals=max(pType->nDimsX,1)*max(pType->nDimsY,1);
+		int nMaxVals=max(pType->GetDimsX(),1)*max(pType->GetDimsY(),1);
 
 		if (ptr<nAllT && aTokens[ptr].T==ETN_BRACEC_OPEN)
 		{
@@ -2220,11 +2269,11 @@ bool CExpCompiler::ReadConstVector(TToken *aTokens,int nAllT,SConstVector &rDest
 					{
 						SComValue &rCV=rDest.aVals[cnt++];
 						rCV=ParseConstExpression(&aTokens[ptr0],ptr-ptr0,this);
-						rCV.cast(pType->Type);
+						rCV.cast(pType->GetType());
 					}
 					else
 					{
-						Error(EERR_TOO_MANY_INIT,m_sNewGlobalVar.c_str());
+						Error(EERR_TOO_MANY_INIT,m_sNewGlobalID.c_str());
 						bRet=false;
 						break;
 					}
@@ -2251,11 +2300,11 @@ bool CExpCompiler::ReadConstVector(TToken *aTokens,int nAllT,SConstVector &rDest
 			{
 				SComValue &rCV=rDest.aVals[cnt++];
 				rCV=ParseConstExpression(&aTokens[ptr0],ptr-ptr0,this);
-				rCV.cast(pType->Type);				
+				rCV.cast(pType->GetType());				
 			}
 			else
 			{
-				Error(EERR_TOO_MANY_INIT,m_sNewGlobalVar.c_str());
+				Error(EERR_TOO_MANY_INIT,m_sNewGlobalID.c_str());
 				bRet=false;
 			}
 			
@@ -2860,6 +2909,7 @@ const char *CExpCompiler::GetShaderVer(int nShaderName,int ver)
 
 	return sRet;
 }
+
 
 bool CExpCompiler::CompilePassGroup(const char *sSourceName_,SFXPassGroup &PG,unsigned int uFlags,const std::map<std::string,std::string> &mDefMacros)
 {
@@ -3510,46 +3560,60 @@ void CExpCompiler::AddLocalStringConversions(TToken *aT,int nAllT)
 	}
 }
 
-#define ADD_PRIM_TYPE(nDims,name,type)	m_mPrimTypes.emplace((nDims>1?#name#nDims:#name),SPrimitiveType((nDims>1?#name#nDims:#name),type,nDims));
+#define ADD_PRIM_TYPE(nDims,name,type)	m_mPrimTypes.emplace((nDims>1?#name#nDims:#name),PBaseType(new CVectorType((nDims>1?#name#nDims:#name),type,nDims)));
 
 void CExpCompiler::CreatePrimitiveTypes()
 {
-	if (m_mPrimTypes.size())
-		return;
-
-	ADD_PRIM_TYPE(1,int,CV_INT);
-	ADD_PRIM_TYPE(1,uint,CV_INT | CV_UNSIGNED);
-	ADD_PRIM_TYPE(1,float,CV_FLOAT);
-	ADD_PRIM_TYPE(1,double,CV_DOUBLE);
-
-	ADD_PRIM_TYPE(2,int,CV_INT);
-	ADD_PRIM_TYPE(2,uint,CV_INT | CV_UNSIGNED);
-	ADD_PRIM_TYPE(2,float,CV_FLOAT);
-	ADD_PRIM_TYPE(2,double,CV_DOUBLE);
-
-	ADD_PRIM_TYPE(3,int,CV_INT);
-	ADD_PRIM_TYPE(3,uint,CV_INT | CV_UNSIGNED);
-	ADD_PRIM_TYPE(3,float,CV_FLOAT);
-	ADD_PRIM_TYPE(3,double,CV_DOUBLE);
-
-	ADD_PRIM_TYPE(4,int,CV_INT);
-	ADD_PRIM_TYPE(4,uint,CV_INT | CV_UNSIGNED);
-	ADD_PRIM_TYPE(4,float,CV_FLOAT);
-	ADD_PRIM_TYPE(4,double,CV_DOUBLE);
-
-	std::vector<std::pair<std::string,SPrimitiveType>> a1DTypes;
-	for (auto &pair:	m_mPrimTypes)
-	if (pair.second.nDimsX==1)
-		a1DTypes.emplace_back(pair.first,pair.second);
-
-	for (auto &pair:	a1DTypes)
-	for (int m=1;m<=4;++m)
-	for (int n=1;n<=4;++n)
+	if (!m_mPrimTypes.size())
 	{
-		char p[32];
-		sprintf_s(p,"%s%ix%i",pair.first.c_str(),m,n);		
-		m_mPrimTypes.emplace(p,SPrimitiveType(p,pair.second.Type,n,m));
+		ADD_PRIM_TYPE(1,int,CV_INT);
+		ADD_PRIM_TYPE(1,uint,CV_INT | CV_UNSIGNED);
+		ADD_PRIM_TYPE(1,float,CV_FLOAT);
+		ADD_PRIM_TYPE(1,double,CV_DOUBLE);
+
+		ADD_PRIM_TYPE(2,int,CV_INT);
+		ADD_PRIM_TYPE(2,uint,CV_INT | CV_UNSIGNED);
+		ADD_PRIM_TYPE(2,float,CV_FLOAT);
+		ADD_PRIM_TYPE(2,double,CV_DOUBLE);
+
+		ADD_PRIM_TYPE(3,int,CV_INT);
+		ADD_PRIM_TYPE(3,uint,CV_INT | CV_UNSIGNED);
+		ADD_PRIM_TYPE(3,float,CV_FLOAT);
+		ADD_PRIM_TYPE(3,double,CV_DOUBLE);
+
+		ADD_PRIM_TYPE(4,int,CV_INT);
+		ADD_PRIM_TYPE(4,uint,CV_INT | CV_UNSIGNED);
+		ADD_PRIM_TYPE(4,float,CV_FLOAT);
+		ADD_PRIM_TYPE(4,double,CV_DOUBLE);
+
+		std::vector<std::pair<std::string,CVectorType *>> a1DTypes;
+		for (auto &pair:	m_mPrimTypes)
+		if (((CVectorType *)pair.second.get())->GetDimsX()==1)
+			a1DTypes.emplace_back(pair.first,(CVectorType *)pair.second.get());
+
+		for (auto &pair:	a1DTypes)
+		for (int m=1;m<=4;++m)
+		for (int n=1;n<=4;++n)
+		{
+			char p[32];
+			sprintf_s(p,"%s%ix%i",pair.first.c_str(),m,n);		
+			m_mPrimTypes.emplace(p,PBaseType(new CVectorType(p,pair.second->GetType(),n,m)));
+		}
 	}
+
+	m_mTypes.clear();
+	for (auto &pair:	m_mPrimTypes)
+		m_mTypes.emplace(pair.first,pair.second);
+}
+
+PBaseType CExpCompiler::FindType(const std::string &sName)
+{
+	auto it=m_mTypes.find(sName);
+
+	if (it!=m_mTypes.end())
+		return it->second;
+
+	return PBaseType();
 }
 
 #include "ConstFunc.inc"

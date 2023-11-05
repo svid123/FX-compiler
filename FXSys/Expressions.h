@@ -15,6 +15,7 @@
 #include "FXCode.h"
 #include "FileHandler.h"
 #include "ComValue.h"
+#include "Type.h"
 
 //This file contains a SIMPLE stacked expression evaluator
 //TODO:	Replace stack sequence parser with RPN parser
@@ -84,29 +85,15 @@ class CExpCompiler:		public CParseHandler,public CFileHandler,CConstProvider
 	static size_t m_hInst;
 	CFileHandler *m_pFileHandler;
 
-	struct SPrimitiveType
-	{
-		std::string sName;
-		CV_TYPE Type;
-		char nDimsX,nDimsY;
-
-		SPrimitiveType(const char *sname,int T,char dimsx,char dimsy=0):Type((CV_TYPE)T),nDimsX(dimsx),nDimsY(dimsy),
-						sName(sname)
-		{
-		}
-
-		SPrimitiveType():Type(CV_NULL),nDimsX(0),nDimsY(0)
-		{
-		}
-	};
 
 	struct SConstVector
 	{
-		SPrimitiveType *pType;
+		const CVectorType *pType;
 		SComValue aVals[4*4];	//For maximum matrix4x4 storage
 	};
 
-	static std::map<std::string,SPrimitiveType> m_mPrimTypes;
+	static std::map<std::string,PBaseType> m_mPrimTypes;
+	std::map<std::string,PBaseType> m_mTypes;
 public:
 	typedef struct{
 					EXP_TOKEN T;
@@ -185,15 +172,7 @@ private:
 	static TMNamedRules m_mNamedRules;
 
 	//typedef std::unordered_map<std::string,std::pair<int,TExpLine>> TMExpScopeVars;
-	enum TYPE_QUALIFIERS_BIT
-	{
-		TQB_STATIC=0,
-		TQB_CONST,
-		TQB_VOLATILE,
-		TQB_UNIFORM,
 
-		TQB_SIZE
-	};
 
 	struct SScopeDesc
 	{
@@ -233,13 +212,18 @@ private:
 	STokenStream m_TStream;
 	SFXCode *m_pOutStream;
 	EXP_TOKEN m_tLastStopKeyword;
-	
+
+//Type ID definition
+	PBaseType m_pGlobalIDBaseType;
+	std::vector<int> m_anIDDimSizes;
+	std::string m_sNewGlobalID;
+	PBaseType m_pGlobalIDType;
+	bool m_bParseIDInit;
+
 //Global vars initializers
-	std::string m_sNewGlobalVar;
 	int m_nCurrentGlobalVarInitDim;
-	SPrimitiveType *m_pGlobalVarType;
 	unsigned int m_uGlobalVarQualifier;
-	std::vector<int> m_anVarSizes,m_anVarPointers;
+	std::vector<int> m_anVarPointers;
 	std::vector<SConstVector> m_aVarInitItems;
 	int m_nCurrentVarAttr;
 	std::set<TToken *> m_sStringConversionTokens;
@@ -326,7 +310,7 @@ private:
 	virtual int getNextRuleID(const std::string &sRuleName)override;
 	virtual int getNextTokenID(const std::string &sStateName)override;
 
-	bool hasRule(SExpRuleState* aStatesStack, int nAllS, EXP_RULE r);
+	bool HasRule(SExpRuleState* aStatesStack, int nAllS, EXP_RULE r);
 
 	virtual void onSuccessRuleState(CPState *pTState,SExpRuleState *aStatesStack,int nAllS,int nStartTokenNum,int nAllT);
 	virtual void onSuccessRule(CPState *pTState,SExpRuleState *aStatesStack,int nAllS,int nTokenNumFirst,int nAllT);
@@ -344,13 +328,14 @@ private:
 	int WriteTokens(TToken *aTokens,int nAllT);
 	void WriteString(const char *s,int nLine);
 
-	void EndGlobalVar();
-	void BeginGlobalVar(TToken *pToken);
+	void EndIDDef();
+	void BeginIDDef(TToken *pToken);
+	void SetGlobalIDType(TToken *aTokens,int nAllT);
+	void DefineNewTypeID(TToken *aTokens,int nAllT);
+
 	void SetTypeQualifier(TToken *pToken);
-	void SetGlobalVarType(TToken *aTokens,int nAllT);
 	void AddGlobalVarInitData(TToken *aTokens,int nAllT);
-	//void SetGlobalVarZeroData(int nStartDimensionLevel);
-	void AddNewGlobalVar();
+	void AddNewInitedVar();
 	bool ReadConstVector(TToken *aTokens,int nAllT,SConstVector &rDest);
 
 	void BeginSamplers(TToken *aTokens,int nAllT);
@@ -406,6 +391,7 @@ private:
 	bool AddNewEnumValue(TToken *aT,int nAllT);
 
 	void CreatePrimitiveTypes();
+	PBaseType FindType(const std::string &sName);
 protected:
 
 	void OutputD3DCompilerErrors(const char *sSourceName,ID3D10Blob *pErrs,SFXCode::TSourceIDLine *anLineIDs,int nAllLines);

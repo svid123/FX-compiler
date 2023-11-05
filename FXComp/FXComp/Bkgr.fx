@@ -1,11 +1,24 @@
 
-#define def(a,...) a=__VA_ARGS__
+typedef float3 TArrayFloats0[2];
+typedef TArrayFloats0 TArrayFloats[3];
+typedef volatile float3 vec3;
 
-float F=10;
-float4 vec=int4(1,0.3,1,1),vec1,vec2=0;
-float3 arrr[3][2]={{float3(1+1,0,0),float3(1,0,0)},
+
+
+
+TArrayFloats arrr={{vec3(1+1,0,0),float3(1,0,0)},
 				{float3(0,1,0),float3(1,1,0)},
 				{float3(0,2,0),float3(1,2,9)}};
+
+
+
+typedef int TTT,ZZ[2];
+#define def(a,...) a=__VA_ARGS__
+
+
+static const float F[2] = {10, 20};
+float4 vec=int4(1,0.3,1,1),vec1,vec2=0;
+
 
 
 
@@ -172,7 +185,7 @@ PS_OUTPUT PixOutRestore(VS_OUT In)
 
 PS_OUTPUT PixOut(VS_OUT In)
 { 
-    PS_OUTPUT Out;	
+    PS_OUTPUT Out;
 
 	bool bReplaceAlpha=false;
 	bool bPointSample=false;
@@ -326,6 +339,5 @@ technique T0
 		SetPixelShader(CompileShader(ps_4_0, PixOutRestore()));
     }*/
 }
-
 
 

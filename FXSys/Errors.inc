@@ -74,3 +74,4 @@ DEF_ERR(ALREADY_DEFINED,		"'%s' already defined in '%s'")
 DEF_ERR(DECLARATION_DIFFERS,	"'%s' different declaration in '%s'")
 
 DEF_ERR(TYPE_MISMATCH,			"type mismatch conversion from '%s' to '%s'")
+DEF_ERR(WRONG_INIT_TYPE,		"can not use initializer of type '%s'")
