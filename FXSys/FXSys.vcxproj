@@ -197,6 +197,7 @@
     <ClInclude Include="TokenGen\TokenHandler.h" />
     <ClInclude Include="TokenGen\TokenMan.h" />
     <ClInclude Include="TokenGen\TState.h" />
+    <ClInclude Include="Type.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CodeDependence.cpp" />

@@ -61,7 +61,7 @@ DEF_ERULE(numbers)
 
 DEF_ERULE(var_qualified_type)
 DEF_ERULE(var_def)
-DEF_ERULE(var_def_id)
+DEF_ERULE(define_id)
 DEF_ERULE(array_dim)
 DEF_ERULE(init_list)
 DEF_ERULE(register_def)

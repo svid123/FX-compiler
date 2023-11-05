@@ -1,4 +1,4 @@
-
+typedef int TTT,ZZ[2];
 #define def(a,...) a=__VA_ARGS__
 
 float F=10;
