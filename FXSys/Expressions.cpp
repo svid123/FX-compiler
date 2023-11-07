@@ -1595,6 +1595,8 @@ void CExpCompiler::onSuccessRuleState(CPState *pState,SExpRuleState *aStatesStac
 								
 									if (bFound)
 										Error(EERR_REDEFINITION,pFirstT->sText);
+
+									m_uGlobalVarQualifier=0;
 								}
 							}
 							//else
@@ -1672,6 +1674,10 @@ void CExpCompiler::onSuccessRule(CPState *pState,SExpRuleState *aStatesStack,int
 
 	switch (expRule)
 	{
+		case ERULE_id_def_strict:
+		case ERULE_id_def:m_uGlobalVarQualifier=0;
+				break;
+
 		case ERULE_define_id:EndIDDef();
 							if (m_pGlobalIDBaseType && HasRule(aStatesStack,nAllS,ERULE_kw_typedef))
 								DefineNewTypeID(pFirstT,nAllT);
@@ -1800,7 +1806,7 @@ void CExpCompiler::onSuccessRule(CPState *pState,SExpRuleState *aStatesStack,int
 				break;
 
 		case ERULE_kw_typedef:if (m_aScopes.size()==1 && nAllS<=3)
-								WriteTokens(pFirstT,nAllT);
+								WriteTokens(pFirstT,nAllT);							
 				break;
 
 		case ERULE_static_attr:if (m_aScopes.size()==1)
@@ -2083,9 +2089,7 @@ void CExpCompiler::EndIDDef()
 	else
 		m_pGlobalIDType=0;
 	
-
-	//m_sNewGlobalID="";
-	m_uGlobalVarQualifier=0;
+	
 	m_nCurrentVarAttr=0;
 }
 

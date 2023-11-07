@@ -289,6 +289,8 @@ void SFXCode::Clear()
 	mTech.clear();
 	mFuncDesc.clear();
 	mDefinitions.clear();
+	mVarsInitData.clear();
+	mVarsAttrs.clear();
 
 	SetDefaultBS(BS);
 	SetDefaultRS(RS);
@@ -379,7 +381,7 @@ void SFXCode::Save(FILE *f,int &rnRndPos)
 		SaveString(f,pair.first,rnRndPos);
 		SaveString(f,pair.second,rnRndPos);
 	}
-
+	
 	DW=(unsigned int)mVarsInitData.size();
 	fwrite(&DW,sizeof(DW),1,f);
 	for (auto &pair:	mVarsInitData)

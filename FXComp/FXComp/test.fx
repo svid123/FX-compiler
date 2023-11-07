@@ -1,25 +1,15 @@
+typedef static const int TT,HH;
+const int vec=10;
 
+TT CS_FRONT=0,
+			CS_RIGHT=1,
+			CS_BACK=2,
+			CS_LEFT=3,
+			CS_TOP=4,
+			CS_BOTTOM=5;
 
-
-
-void fn()
+const int fn()
 {
-	return 0;
+	int n=10;
+	return n;
 }
-
-//float f[2],ff[5][1];
-
-/*
-void vs()
-{
-	
-}
-/*
-technique T
-{
-	pass P
-	{
-		SetVertexShader(50,vs);
-	}
-}
-*/
