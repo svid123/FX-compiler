@@ -755,6 +755,11 @@ bool CExpCompiler::Compile(const char *sFileName,const char *_sDir,SFXCode &rDes
 	
 	CreatePrimitiveTypes();
 
+	m_anIDDimSizes.clear();
+	m_sNewGlobalID="";
+	m_pGlobalIDType=0;
+	m_pGlobalIDBaseType=0;
+	m_sCurrentStructName="";
 	m_tLastStopKeyword=ETN_NONE;
 	m_nLastErrorLine=0;
 	m_nBlockErrorRuleLn=-1;
@@ -1043,7 +1048,7 @@ void CExpCompiler::blockOpen(bool bOpen,SExpRuleState *aStatesStack,int nAllS,in
 		else //block
 		*/
 		{
-			PushScope("");//getNextName("block"));
+			PushScope(m_CurrentFunc.sName);//getNextName("block"));
 		}		
 	}
 	else
@@ -1374,6 +1379,22 @@ void CExpCompiler::onSuccessRuleState(CPState *pState,SExpRuleState *aStatesStac
 		case ERULE_kw_struct:if (pCurRS->nState==0 && m_nCurrentVarAttr)
 							{
 								m_nCurrentVarAttr=0;
+							}
+							else
+							if (pCurRS->nState==1)
+							{
+								m_sCurrentStructName=pFirstT->sText;
+							}
+							else
+							if (pCurRS->nState==2)
+							{
+								PushScope(m_sCurrentStructName);
+							}
+							else
+							if (pCurRS->nState==4)
+							{
+								PopScope();
+								m_sCurrentStructName="";
 							}
 				break;
 

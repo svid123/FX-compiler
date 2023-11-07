@@ -109,7 +109,7 @@ kw_enum=[ETN_KW_ENUM][ETN_ID][ETN_BLOCK_OPEN]	{enum_def} ([ETN_COMMA]{enum_def})
 struct_var=[ETN_ID] {array_dim}*
 struct_definition=[ETN_KW_LINEAR-ETN_KW_SAMPLE]* {id_def_strict} [ETN_SEMICOLON]
 
-kw_struct=[ETN_KW_STRUCT] [ETN_ID]? [ETN_BLOCK_OPEN] {struct_definition}+ [ETN_BLOCK_CLOSE]
+kw_struct=[ETN_KW_STRUCT] [ETN_ID]? [ETN_BLOCK_OPEN] ({struct_definition} | {kw_typedef})+ [ETN_BLOCK_CLOSE]
 
 numbers=[ETN_CONST_INT,ETN_CONST_FLOAT,ETN_CONST_DOUBLE]
 

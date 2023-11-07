@@ -246,6 +246,7 @@ private:
 	SFXCode::SFuncDesc m_CurrentFunc;
 	int m_nFirstAttributeOutLine;
 	std::string m_sNewEnum;
+	std::string m_sCurrentStructName;
 
 	class CPassConstProvider:	public CConstProvider
 	{
