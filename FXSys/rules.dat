@@ -41,7 +41,6 @@ under_const_expr={kw_expression}
 
 
 var_func_definition={var_def} | {func_def}
-arg_type=[ETN_KW_SIGNED,ETN_KW_UNSIGNED,ETN_KW_TRIANGLE-ETN_KW_POINT]? ([ETN_ID, ETN_KW_VOID, ETN_KW_SAMPLER, ETN_KW_SAMPLERSTATE, ETN_KW_SAMPLERCMPSTATE]) ([ETN_OP_LESS] {template_expression} [ETN_OP_GATE])?
 
 func_def={func_name} {block}
 func_name={var_qualified_type} [ETN_ID] [ETN_BRACEC_OPEN] {args}? [ETN_BRACEC_CLOSE] ([ETN_OP_ELSE] [ETN_ID])?
@@ -73,6 +72,7 @@ arg_expr_block=[ETN_BRACEC_OPEN] ({arg_expr_block} | {arg_expr_chars})* [ETN_BRA
 arg_expr_chars=[ETN_ID, ETN_KW_SIGNED, ETN_KW_UNSIGNED, ETN_OP_PLUS-ETN_CONST_DOUBLE_E, ETN_COMMA]
 arg_expr_chars_no_comma=[ETN_ID, ETN_KW_SIGNED, ETN_KW_UNSIGNED, ETN_OP_PLUS-ETN_CONST_DOUBLE_E]
 
+arg_type=[ETN_KW_SIGNED,ETN_KW_UNSIGNED,ETN_KW_TRIANGLE-ETN_KW_POINT]? ([ETN_ID, ETN_KW_VOID, ETN_KW_SAMPLER, ETN_KW_SAMPLERSTATE, ETN_KW_SAMPLERCMPSTATE]) ([ETN_OP_LESS] {template_expression} [ETN_OP_GATE])?
 arg=[ETN_KW_OUT-ETN_KW_UNIFORM,ETN_KW_CONST]? {arg_type} [ETN_ID] {array_dim}* (([ETN_OP_ASSIGN] {arg_expression}) | ([ETN_OP_ELSE][ETN_ID]))?
 var_arg=[ETN_VAARG]
 args={arg} ([ETN_COMMA]{arg})* ([ETN_COMMA]{var_arg})?

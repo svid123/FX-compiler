@@ -1483,7 +1483,7 @@ void CExpCompiler::onSuccessRuleState(CPState *pState,SExpRuleState *aStatesStac
 							}
 				break;
 
-		case ERULE_var_qualified_type:if (m_aScopes.size()==1)	//Only in global scope
+		case ERULE_var_qualified_type:if (m_aScopes.size()==1 && !HasRule(aStatesStack,nAllS,ERULE_func_def))	//Only in global scope
 									{
 										if (pCurRS->nState==0)
 										{
@@ -3627,12 +3627,15 @@ void CExpCompiler::CreatePrimitiveTypes()
 		m_mTypes.emplace(pair.first,pair.second);
 }
 
-PBaseType CExpCompiler::FindType(const std::string &sName)
+PBaseType CExpCompiler::FindType(const const char *sName)
 {
-	auto it=m_mTypes.find(sName);
+	if (sName)
+	{
+		auto it=m_mTypes.find(sName);
 
-	if (it!=m_mTypes.end())
-		return it->second;
+		if (it!=m_mTypes.end())
+			return it->second;
+	}
 
 	return PBaseType();
 }

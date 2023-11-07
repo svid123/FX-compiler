@@ -392,7 +392,7 @@ private:
 	bool AddNewEnumValue(TToken *aT,int nAllT);
 
 	void CreatePrimitiveTypes();
-	PBaseType FindType(const std::string &sName);
+	PBaseType FindType(const char *sName);
 protected:
 
 	void OutputD3DCompilerErrors(const char *sSourceName,ID3D10Blob *pErrs,SFXCode::TSourceIDLine *anLineIDs,int nAllLines);

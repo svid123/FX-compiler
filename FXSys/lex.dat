@@ -69,6 +69,7 @@
 [ETN_KW_CBUFFER, cbuffer]=cbuffer
 
 [ETN_KW_OUT, out]=out
+[ETN_KW_IN, in]=in
 [ETN_KW_INOUT, inout]=inout
 [ETN_KW_UNIFORM, uniform]=uniform
 [ETN_KW_EXTERN, extern]=extern
