@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <functional>
 
+using namespace fx;
+
 
 #define FORMAT_VER 4
 

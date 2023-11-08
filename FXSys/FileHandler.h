@@ -5,6 +5,9 @@
 #include <unordered_map>
 #include <sstream>
 
+namespace fx
+{
+
 class CFileHandler
 {
 public:
@@ -14,3 +17,5 @@ public:
 	virtual unsigned long GetChangeDHMS(const char *sFileName);
 };
 
+
+}

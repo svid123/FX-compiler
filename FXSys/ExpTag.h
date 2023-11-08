@@ -4,6 +4,8 @@
 #include <unordered_map>
 #include "ComValue.h"
 
+namespace fx
+{
 
 	
 class CExpTag
@@ -34,3 +36,5 @@ public:
 	bool AddID(const std::string &sIDName,int *pnConst);
 	int *GetIDConst(const std::string &sIDName);
 };
+
+}

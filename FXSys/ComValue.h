@@ -6,6 +6,8 @@
 #include <crtdbg.h>
 #include <memory>
 
+namespace fx
+{
 
 struct SComValue;
 //typedef std::shared_ptr<CCBaseType> PCBaseType;
@@ -161,4 +163,4 @@ public:
 };
 
 
-//typedef CQuickVector<SComValue> TAComValues;
+}

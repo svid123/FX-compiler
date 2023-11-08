@@ -7,6 +7,8 @@
 #include <unordered_map>
 #include <crtdbg.h>
 
+namespace fx
+{
 
 
 struct SSerializable
@@ -209,3 +211,5 @@ struct SSerializable
 	virtual bool Serialize(SSerializerIOContext &io)=0;
 };
 
+
+}

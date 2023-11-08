@@ -6,6 +6,9 @@
 #include <crtdbg.h>
 #include <minmax.h>
 
+using namespace fx;
+
+
 bool SCodeDependence::Serialize(SSerializerIOContext &io)
 {
 	io<<sFileName;

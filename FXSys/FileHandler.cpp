@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include <time.h>
 
+using namespace fx;
 
 
 std::istream *CFileHandler::OpenFileBIN(const char *sFN)

@@ -22,18 +22,22 @@
 //		Optimize Calculate function, replace operators switch with FuncPtrs
 //		Replace explicit values with referenced values
 
+class CTokenMan;
+class CExpParser;
+struct ID3D10Blob;
+
+namespace fx
+{
+
 struct SComValue;
 
 
 
 class CExpCompiler;
-class CTokenMan;
-class CExpParser;
 class CExpErrors;
 class CPreprocessor;
 class CExpTag;
 
-struct ID3D10Blob;
 
 
 class CConstProvider
@@ -478,3 +482,4 @@ template<typename T> T Calculate(CExpCompiler<T> *lpCreator,std::vector<SOperati
 
 
 */
+}

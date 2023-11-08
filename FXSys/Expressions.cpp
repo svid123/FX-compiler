@@ -20,6 +20,8 @@
 #include <windows.h>
 #include <algorithm>
 
+using namespace fx;
+
 #define COMPILER_VERSION 0
 
 #define MUTE_GLOBAL_INITIALIZERS
@@ -3631,7 +3633,7 @@ void CExpCompiler::CreatePrimitiveTypes()
 		m_mTypes.emplace(pair.first,pair.second);
 }
 
-PBaseType CExpCompiler::FindType(const const char *sName)
+PBaseType CExpCompiler::FindType(const char *sName)
 {
 	if (sName)
 	{

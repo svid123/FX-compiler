@@ -13,6 +13,9 @@
 #include "FXTypes.h"
 #include "Serializer.h"
 
+namespace fx
+{
+
 typedef int TExpLine;
 
 class CExpCompiler;
@@ -174,3 +177,5 @@ public:
 };
 
 
+
+}

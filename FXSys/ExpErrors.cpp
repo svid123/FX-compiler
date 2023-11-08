@@ -6,6 +6,8 @@
 #include <windows.h>
 #include <algorithm>
 
+using namespace fx;
+
 std::unordered_map<EXP_ERRORS,std::string> CExpErrors::m_mErrorStrings;
 
 CExpErrors::CExpErrors()

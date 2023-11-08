@@ -1,5 +1,8 @@
 #pragma once
 
+namespace fx
+{
+
 #define BEGIN_FX_ENUM(ename)	enum ename {
 #define END_FX_ENUM	};
 #define FX_ENUM(prefix,name,val)		prefix##_##name=val,
@@ -127,4 +130,6 @@ inline void SetDefaultDSS(FX_DEPTH_STENCIL_DESC &DSS)
 	DSS.BackFace.StencilDepthFailOp=FX_STENCIL_OP_KEEP;
 	DSS.BackFace.StencilPassOp=FX_STENCIL_OP_KEEP;
 	DSS.BackFace.StencilFunc=FX_COMPARISON_ALWAYS;
+}
+
 }

@@ -3,6 +3,9 @@
 #include <string>
 #include <unordered_map>
 
+namespace fx
+{
+
 #define DEF_ERR(code,text) EERR_##code,
 enum EXP_ERRORS
 {
@@ -26,3 +29,5 @@ public:
 	std::string formatError(EXP_ERRORS e,const char *str0,const char *str1);
 	void addTokenComment(int T,const char *sComment);
 };
+
+}

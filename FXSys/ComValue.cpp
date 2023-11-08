@@ -5,6 +5,7 @@
 #include <minmax.h>
 #include <windows.h>
 
+using namespace fx;
 
 
 SComValue::operator bool()const

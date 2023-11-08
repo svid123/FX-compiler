@@ -3,6 +3,9 @@
 #include <string>
 #include <functional>
 
+namespace fx
+{
+
 template <class TChar>
 using TBasicConstString=std::basic_string<TChar, std::char_traits<TChar>, std::allocator<TChar>>;
 
@@ -127,13 +130,15 @@ bool operator ==(const TBasicConstString<TChar> &rSrcL,const constbasic_string<T
 
 
 template <class TChar>
-class std::hash<constbasic_string<TChar>>
+class std::hash<fx::constbasic_string<TChar>>
 {
 public:
-	size_t operator()(const constbasic_string<TChar> &rSrc)const
+	size_t operator()(const fx::constbasic_string<TChar> &rSrc)const
 	{
 		return rSrc.hash();
 	}
 };
 
-typedef constbasic_string<char> conststring;
+typedef fx::constbasic_string<char> conststring;
+
+}

@@ -6,6 +6,8 @@
 
 #include "ComValue.h"
 
+namespace fx
+{
 
 class CBaseType;
 
@@ -179,3 +181,5 @@ public:
 		return pRet;
 	}
 };
+
+}

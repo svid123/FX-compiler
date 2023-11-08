@@ -10,6 +10,8 @@
 
 #include "Serializer.h"
 
+namespace fx
+{
 
 struct SCodeDependence:	public SSerializable
 {
@@ -48,3 +50,5 @@ struct SCodeDependence:	public SSerializable
 };
 
 typedef std::vector<SCodeDependence> TADependences;
+
+}

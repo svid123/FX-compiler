@@ -4,8 +4,9 @@
 #include "Expressions.h"
 #include "Preprocessor.h"
 
+using namespace fx;
 
-bool FXCompile(const char *sFXFile,const char *sAdditionalDir,unsigned int uFlags,std::string *asDefs,int nAllDefs,
+bool fx::FXCompile(const char *sFXFile,const char *sAdditionalDir,unsigned int uFlags,std::string *asDefs,int nAllDefs,
 				SFXCode &dest,std::string &rsErrors,CFileHandler *pFH,const char *sLogFileName)
 {
 	//CExpCompiler::setHINSTANCE((size_t)GetModuleHandle(0));

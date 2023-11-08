@@ -13,6 +13,7 @@
 
 #include <functional>
 
+using namespace fx;
 
 #define FILE_STR_SIZE 1024
 

@@ -2,6 +2,8 @@
 
 #include "ExpTag.h"
 
+using namespace fx;
+
 
 CExpTag::CExpTag(const std::string &sName):m_sName(sName)
 {

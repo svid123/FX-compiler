@@ -4,6 +4,10 @@
 #include "TokenGen/TokenHandler.h"
 
 class CTokenMan;
+
+namespace fx
+{
+
 class CFileHandler;
 
 typedef std::vector<std::string> TAStrings;
@@ -303,3 +307,5 @@ public:
 	static std::string GetShortFileName(const std::string &sSrc,int nSlashes=2);
 	static void decode(const char *sSrc,std::string &rsDest);
 };
+
+}

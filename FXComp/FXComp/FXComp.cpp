@@ -10,6 +10,8 @@
 #include "FXSys/CodeDependence.h"
 #include "dxc/dxcapi.h"
 
+using namespace fx;
+
 std::string g_sDir;
 std::string g_sIncludeDir;
 std::vector<std::tuple<std::string,std::string,bool>> g_asFiles;
