@@ -18,7 +18,24 @@ Additionaly it provides global definitions per pass, definition-ranges per pass 
 1) Support for 'enum' keyword (translates values into macro definitins, enum tag in HLSL treated as 'int' type)
 2) Converts character string of initializers into array of characters (i.e. uint chars[]="text" => uint chars[]={'t','e','x','t'})
 3) Precompiler collects global initializers of constants and sampelers (and removes from HLSL for DXC).
-4) Has it's own C preprocessor with supported directives:<br /> 
+4) Precompiler keywords<br/>
+   **enum**<br/>
+   **technique**<br/>
+   **pass**<br/>
+   **DefRange**<br/>
+   **RasterizerState**<br/>
+   **BlendState**<br/>
+   **DepthStencilState**<br/>
+   **SetBlendState**<br/>
+   **SetRasterizerState**<br/>
+   **SetDepthStencilState**<br/>
+   **SetVertexShader**<br/>
+   **SetPixelShader**<br/>
+   **SetGeometryShader**<br/>
+   **SetHullShader**<br/>
+   **SetDomainShader**<br/>
+   **SetComputeShader**<br/>
+5) Has it's own C preprocessor with supported directives:<br /> 
 	**#include**<br />
 	**#define**<br />
 	**#if**<br />
@@ -36,25 +53,8 @@ Additionaly it provides global definitions per pass, definition-ranges per pass 
    </p>
    Allows bypass of preprocessor directives for DXC using ## for keyword (like ##ifdef)<br />
    Supports standard C macro expansion for macro arguments 
-5) Has internal constant-expressions parser for preprocessor #if keyword and all the FX entities (i.e. DepthBias=1+0.5*2)
-6) Provides bypass ## for preprocessor keywords (such directives are not processed by FXSys and kept for DXC)
-7) Precompiler keywords<br/>
-   **enum**<br/>
-   **technique**<br/>
-   **pass**<br/>
-   **DefRange**<br/>
-   **RasterizerState**<br/>
-   **BlendState**<br/>
-   **DepthStencilState**<br/>
-   **SetBlendState**<br/>
-   **SetRasterizerState**<br/>
-   **SetDepthStencilState**<br/>
-   **SetVertexShader**<br/>
-   **SetPixelShader**<br/>
-   **SetGeometryShader**<br/>
-   **SetHullShader**<br/>
-   **SetDomainShader**<br/>
-   **SetComputeShader**<br/>
+6) Has internal constant-expressions parser for preprocessor #if directive and all the FX entities (i.e. DepthBias=1+0.5*2)
+7) Provides bypass ## for preprocessor keywords (such directives are not processed by FXSys and kept for DXC)
 8) Custom attributes<br/>
 **[root_param]**<br/>
 **[root_const]**<br/>
@@ -148,7 +148,7 @@ Currently supported types of initializers are scalar and vector/matrix types, su
 **float**<br/>
 **double**<br/>
 With up to two dimensions (i.e. int4, float3x3, etc.)<br/>
-Shader model 6.0 and higher does not support global initializers, so FXSys collects these values and creates aligned data-buffers in separate dictionary and removes it from output translation unit.<br/>
+Shader model 6.0 and higher does not support global initializers, so FXSys collects these values and creates aligned data-buffers in separate dictionary and removes it from output translation unit. Constant values support scalar math, binary, bitwise operators<br/>
 
 ### Example of global initializers:
 ```
