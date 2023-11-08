@@ -154,4 +154,10 @@ color4 g_avColors[3] = {color4(1,1,1,1),color4(1,1,1,1),color4(1,1,1,1)};
 
 float2x2 g_amRotations[2][2] = {{float2x2(1,0,0,-1),float2x2(0,-1,1,0)},
 				{float2x2(1,1,1,1),float2x2(0,0,0,0)}};
+
+cbuffer CBSetup
+{
+	float4 g_vSetup = float4(1,0.5,0,0);
+	float4 g_vViewport = float4(0,0,1,1);
+};
 ```
