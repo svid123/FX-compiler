@@ -18,7 +18,7 @@ Additionaly it provides global definitions per pass, definition-ranges per pass 
 ### Extensions of standard HLSL are
 1) Support for 'enum' keyword (translates values into macro definitins, enum tag in HLSL treated as 'int' type)
 2) Converts character string of initializers into array of characters (i.e. uint chars[]="text" => uint chars[]={'t','e','x','t'})
-3) Precompiler collects global initializers of constants and sampelers (and removes from HLSL for DXC).
+3) Precompiler collects global initializers of constants and samplers (and removes from HLSL for DXC).
 4) Precompiler keywords<br/>
    **enum**<br/>
    **technique**<br/>
