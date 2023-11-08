@@ -2341,6 +2341,12 @@ bool CExpCompiler::ReadConstVector(TToken *aTokens,int nAllT,SConstVector &rDest
 			for (;cnt<nMaxVals;++cnt)
 				rDest.aVals[cnt]=rDest.aVals[cnt-1];
 
+			if (ptr<nAllT-1)
+			{
+				Error(EERR_UNEXPECTED_TOKEN,(char *)&aTokens[ptr+1],0);
+				bRet=false;
+			}
+
 			if (nLevel)
 			{
 				Error(EERR_MISSING_CHAR,(char *)')',0);

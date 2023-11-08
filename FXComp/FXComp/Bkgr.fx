@@ -15,7 +15,7 @@ typedef volatile float3 vec3;
 
 
 
-TArrayFloats arrr={{vec3(1+1,0,0),float3(1,0,0)},
+TArrayFloats arrr={{vec3(1,0,0),float3(1,0,0)},
 				{float3(0,1,0),float3(1,1,0)},
 				{float3(0,2,0),float3(1,2,9)}};
 
@@ -264,10 +264,11 @@ technique T0
 		SetRasterizerState(RS_NoCull);
 
 		aa=true;
+		cc=!aa;
 		bb="asd"
 				"aaaasd";
 		//DefRange(zzz,-2,1);
-		//DefRange(range,1,3);
+		DefRange(range,aa,3);
 
 
 		//SetVertexShader(50, VertOut);
