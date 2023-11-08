@@ -133,3 +133,25 @@ sampler LerpSampler
 	AddressV = CLAMP;
 };
 ```
+
+Global initializers support<br/>
+Currently supported types of initializers are scalar and vector/matrix types, such as<br/>
+**uint**<br/>
+**int**<br/>
+**float**<br/>
+**double**<br/>
+With up to two dimensions (i.e. int4, float3x3, etc.)<br/>
+
+Example of global initializers:
+```
+#define VAR_MULTIPLIER 2.0f
+
+typedef float4 color4;
+
+float g_fVar = 14.0f*VAR_MULTIPLIER;
+
+color4 g_avColors[3] = {color4(1,1,1,1),color4(1,1,1,1),color4(1,1,1,1)};
+
+float2x2 g_amRotations[2][2] = {{float2x2(1,0,0,-1),float2x2(0,-1,1,0)},
+				{float2x2(1,1,1,1),float2x2(0,0,0,0)}};
+```
