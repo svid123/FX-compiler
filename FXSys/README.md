@@ -45,6 +45,7 @@ Extensions of standard HLSL are<br />
    **DefRange**<br/>
    **RasterizerState**<br/>
    **BlendState**<br/>
+   **DepthStencilState**<br/>
    **SetBlendState**<br/>
    **SetRasterizerState**<br/>
    **SetDepthStencilState**<br/>
