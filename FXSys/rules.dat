@@ -118,6 +118,7 @@ kw_cbuffer=[ETN_KW_CBUFFER] [ETN_ID] {register_def}? [ETN_BLOCK_OPEN] ({var_def}
 
 
 
+
 ;****** Sampler ******
 sampler_definition=[ETN_ID] [ETN_OP_ASSIGN] {const_expression} [ETN_SEMICOLON]
 sampler=[ETN_BLOCK_OPEN] {sampler_definition}+ [ETN_BLOCK_CLOSE]
@@ -155,5 +156,4 @@ kw_pass=[ETN_KW_PASS] [ETN_ID] [ETN_BLOCK_OPEN] {pass_definition}+ [ETN_BLOCK_CL
 
 ;****** technique ******
 kw_technique=[ETN_KW_TECH] [ETN_ID] [ETN_BLOCK_OPEN] {kw_pass}+ [ETN_BLOCK_CLOSE]
-
 
