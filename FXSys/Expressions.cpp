@@ -863,7 +863,6 @@ bool CExpCompiler::Compile(const char *sFileName,const char *_sDir,SFXCode &rDes
 	_ASSERTE(m_pParser);
 	if (anTokens.size())
 	{
-		anTokens.resize(anTokens.size());
 		m_pParser->process(&anTokens[0],(int)anTokens.size());
 
 		rDest.bCompiled=(nErrCnt==m_nErrorsCnt);
