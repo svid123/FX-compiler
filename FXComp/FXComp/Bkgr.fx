@@ -26,7 +26,7 @@ typedef int TTT,ZZ[2];
 
 
 static const float F[2] = {10, 20};
-float4 vec=int4(1,0.3,1,1),vec1,vec2=0;
+float4 vec=int4(1,0.3,1,1),vec1,vec2=false;
 
 
 
@@ -263,8 +263,9 @@ technique T0
 		SetDepthStencilState(DSS_NoZNoWrite,0);
 		SetRasterizerState(RS_NoCull);
 
-		aa=true;
-		cc=!aa;
+		
+		aa=0;
+		cc=aa+10+5+5;
 		bb="asd"
 				"aaaasd";
 		//DefRange(zzz,-2,1);

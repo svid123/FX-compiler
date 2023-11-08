@@ -149,9 +149,9 @@ set_dss=[ETN_KW_SETDSS] [ETN_BRACEC_OPEN] [ETN_ID] [ETN_COMMA] {const_expression
 set_shader=([ETN_KW_SETPS] | [ETN_KW_SETVS] | [ETN_KW_SETGS] | [ETN_KW_SETHS] | [ETN_KW_SETDS] | [ETN_KW_SETCS]) [ETN_BRACEC_OPEN] {const_expression} [ETN_COMMA] [ETN_ID] [ETN_BRACEC_CLOSE]
 kw_defrange=[ETN_KW_DEFRANGE] [ETN_BRACEC_OPEN] [ETN_ID] [ETN_COMMA] {const_expression} [ETN_COMMA] {const_expression} [ETN_BRACEC_CLOSE]
 kw_defconst=[ETN_ID] [ETN_OP_ASSIGN] ([ETN_CONST_STRING] | {const_expression})
-pass_definition={set_rs} | {set_bs} | {set_dss} | {set_shader} | {kw_defrange} | {kw_defconst}
+pass_definition=({set_rs} | {set_bs} | {set_dss} | {set_shader} | {kw_defrange} | {kw_defconst}) [ETN_SEMICOLON]
 
-kw_pass=[ETN_KW_PASS] [ETN_ID] [ETN_BLOCK_OPEN] ({pass_definition} [ETN_SEMICOLON])+ [ETN_BLOCK_CLOSE]
+kw_pass=[ETN_KW_PASS] [ETN_ID] [ETN_BLOCK_OPEN] {pass_definition}+ [ETN_BLOCK_CLOSE]
 
 ;****** technique ******
 kw_technique=[ETN_KW_TECH] [ETN_ID] [ETN_BLOCK_OPEN] {kw_pass}+ [ETN_BLOCK_CLOSE]
