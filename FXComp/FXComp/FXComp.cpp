@@ -355,12 +355,11 @@ int main(int argc, char* argv[])
 			else
 			{
 				Code.Save(sOut.c_str());
-				/*Code.Clear();
-
+				Code.Clear();
+				/*
 				std::ifstream f(sOut.c_str(),std::ios_base::in | std::ios_base::binary);
 				Code.Load(f,sOut.c_str(),false);
-				auto it=Code.mSamplers.begin();
-				it++;*/
+				Code.Clear();*/
 			}
 			/*
 			{

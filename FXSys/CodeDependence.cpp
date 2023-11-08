@@ -6,34 +6,17 @@
 #include <crtdbg.h>
 #include <minmax.h>
 
-
-void SCodeDependence::Save(FILE *f)
+bool SCodeDependence::Serialize(SSerializerIOContext &io)
 {
-	unsigned short W=(unsigned short)sFileName.length();
-	fwrite(&W,sizeof(W),1,f);
-	fwrite(sFileName.c_str(),W,1,f);
-	fwrite(&uChangeDHMS,sizeof(uChangeDHMS),1,f);
-	fwrite(&bRelPath,1,1,f);
+	io<<sFileName;
+	io<<uChangeDHMS;
+	io<<bRelPath;
 
 	_ASSERTE(sFileName.find(':')==-1);
-}
-bool SCodeDependence::Load(std::istream &f)
-{
-	unsigned short W;
-	f.read((char *)&W,sizeof(W));
 
-	if (W)
-	{
-		sFileName.resize(W);
-		f.read((char *)sFileName.c_str(),W);
-		int pos=(int)f.tellg();
-		f.read((char *)&uChangeDHMS,sizeof(uChangeDHMS));
-		f.read((char *)&bRelPath,1);
-		return true;
-	}
-	
-	return false;
+	return true;
 }
+
 /*
 bool SCodeDependence::UpdateFileChange(const std::string &sBaseDir)
 {

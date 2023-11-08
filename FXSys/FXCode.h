@@ -11,12 +11,13 @@
 #include <iostream>
 
 #include "FXTypes.h"
+#include "Serializer.h"
 
 typedef int TExpLine;
 
 class CExpCompiler;
 
-struct SFXCodeHdr
+struct SFXCodeHdr:	public SSerializable
 {
 	std::string sName;
 	TADependences aDependences;
@@ -26,15 +27,14 @@ struct SFXCodeHdr
 	{
 	}
 
-	void Save(FILE *f,int &rnRndPos);
-	bool Load(std::istream &f,int &rnRndPos);
+	virtual bool Serialize(SSerializable::SSerializerIOContext &io) override;
 
 	void Clear();
 };
 
 typedef std::vector<unsigned char> TFXBytecode;
 
-struct SFXPass
+struct SFXPass:	public SSerializable
 {
 	enum FX_SHADER
 	{
@@ -49,10 +49,17 @@ struct SFXPass
 	};
 
 	TFXBytecode aShaders[FXS_SIZE];
+	virtual bool Serialize(SSerializable::SSerializerIOContext &io) override
+	{
+		for (TFXBytecode &code:	aShaders)
+			io<<code;
+
+		return true;
+	}
 };
 
 
-struct SFXPassGroup
+struct SFXPassGroup:	public SSerializable
 {
 	typedef struct{
 					unsigned char uIndex;
@@ -75,30 +82,27 @@ struct SFXPassGroup
 	SFXPassGroup();
 	SFXPassGroup(const SFXPassGroup &src);
 
-	void Save(FILE *f,int &rnRndPos);
-	void Load(std::istream &f,int &rnRndPos);
+	virtual bool Serialize(SSerializable::SSerializerIOContext &io) override;
 
 	SFXPassGroup &operator =(const SFXPassGroup &src);
 };
 
-struct SFXTech
+struct SFXTech:	public SSerializable
 {
 	std::string sName;
 	std::vector<SFXPassGroup> aPassG;
 
-	void Save(FILE *f,int &rnRndPos);
-	void Load(std::istream &f,int &rnRndPos);
+	virtual bool Serialize(SSerializable::SSerializerIOContext &io) override;
 };
 
-struct SFXCode
+struct SFXCode:	public SSerializable
 {
 	typedef int TSourceIDLine;
 	typedef bool TEnabledLine;
 	typedef std::tuple<TSourceIDLine,std::string,TEnabledLine> TSourceLine;
 	typedef std::vector<unsigned char> TInitData;
 
-	bool Load(std::istream &f,int &rnRndPos,bool bHeaderOnly);
-	void Save(FILE *f,int &rnRndPos);
+	
 
 	struct SFuncDesc
 	{
@@ -119,6 +123,9 @@ struct SFXCode
 			sReferencedFunc.clear();
 		}
 	};
+
+	bool bSerializeHeaderOnly;
+	virtual bool Serialize(SSerializable::SSerializerIOContext &io) override;
 
 public:
 	enum VAR_ATTR_BIT
@@ -155,9 +162,6 @@ public:
 	bool Load(std::istream &rInput,const char *sFileName,bool bHeaderOnly);
 
 	unsigned long GetCompilerVer()const;
-
-	static void SaveString(FILE *f,const std::string &s,int &rnRndPos);
-	static std::string LoadString(std::istream &f,int &rnRndPos);
 
 	static int GetFormatVersion();
 	void FormatSource(std::string &sDest,bool bAllLines=false,std::vector<TSourceIDLine> *panLineID=0);

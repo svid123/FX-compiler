@@ -8,10 +8,10 @@
 
 #include <iostream>
 
+#include "Serializer.h"
 
 
-
-struct SCodeDependence
+struct SCodeDependence:	public SSerializable
 {
 	std::string sFileName;	//File names are relative to base source file (if in same path tree)
 	unsigned long uChangeDHMS;	//File change: Day, Hour, Min, Sec
@@ -29,9 +29,6 @@ struct SCodeDependence
 	{
 	}
 
-	void Save(FILE *f);
-	bool Load(std::istream &f);
-
 	//bool UpdateFileChange(const std::string &sBaseDir);
 
 	bool operator ==(const std::string &s)
@@ -42,6 +39,8 @@ struct SCodeDependence
 	{
 		return src.sFileName==sFileName && src.uChangeDHMS==uChangeDHMS;
 	}
+
+	virtual bool Serialize(SSerializerIOContext &io);
 
 	static std::string ConvertFileNameRelative(const std::string &sBaseFN,const std::string &sFN);
 	static std::string MakePathFileName(const std::string &sDir,const char *sFN);
