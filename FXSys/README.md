@@ -54,6 +54,12 @@ Extensions of standard HLSL are<br />
    **SetHullShader**<br/>
    **SetDomainShader**<br/>
    **SetComputeShader**<br/>
+8) Custom attributes<br/>
+**[root_param]**<br/>
+**[root_const]**<br/>
+These attributes are collected into separate dictionary with belonging ID's as helpers for inline Root Signature constants and parameters
+
+
 
 Example syntax for technique definition:
 ```
