@@ -118,10 +118,11 @@ kw_cbuffer=[ETN_KW_CBUFFER] [ETN_ID] {register_def}? [ETN_BLOCK_OPEN] ({var_def}
 
 
 
+
 ;****** Sampler ******
-sampler_definition=[ETN_ID] [ETN_OP_ASSIGN] {const_expression}
-sampler=[ETN_BLOCK_OPEN] ({sampler_definition} [ETN_SEMICOLON])+ [ETN_BLOCK_CLOSE]
-sampler_in_array=[ETN_ID] | ([ETN_KW_SAMPLER,ETN_KW_SAMPLERSTATE] [ETN_BLOCK_OPEN] ({sampler_definition} [ETN_SEMICOLON])+ [ETN_BLOCK_CLOSE])
+sampler_definition=[ETN_ID] [ETN_OP_ASSIGN] {const_expression} [ETN_SEMICOLON]
+sampler=[ETN_BLOCK_OPEN] {sampler_definition}+ [ETN_BLOCK_CLOSE]
+sampler_in_array=[ETN_ID] | ([ETN_KW_SAMPLER,ETN_KW_SAMPLERSTATE] [ETN_BLOCK_OPEN] {sampler_definition}+ [ETN_BLOCK_CLOSE])
 samplers_sampler_dimension={sampler_in_array} | {samplers_dimension}
 samplers_dimension=[ETN_BLOCK_OPEN] {samplers_sampler_dimension} ([ETN_COMMA] {samplers_sampler_dimension})* [ETN_BLOCK_CLOSE]
 samplers_array_size=[ETN_BRACES_OPEN] {const_expression} [ETN_BRACES_CLOSE]
@@ -129,17 +130,17 @@ samplers_array={samplers_array_size}+ [ETN_OP_ASSIGN] {samplers_dimension}
 kw_sampler=[ETN_KW_SAMPLER,ETN_KW_SAMPLERSTATE,ETN_KW_SAMPLERCMPSTATE] [ETN_ID] ({samplers_array} | {sampler})
 
 ;****** RasterizerState ******
-rs_definition=[ETN_ID] [ETN_OP_ASSIGN] {const_expression}
-kw_rasterstate=[ETN_KW_RASTERSTATE] [ETN_ID] [ETN_BLOCK_OPEN] ({rs_definition} [ETN_SEMICOLON])+ [ETN_BLOCK_CLOSE] [ETN_SEMICOLON]
+rs_definition=[ETN_ID] [ETN_OP_ASSIGN] {const_expression} [ETN_SEMICOLON]
+kw_rasterstate=[ETN_KW_RASTERSTATE] [ETN_ID] [ETN_BLOCK_OPEN] {rs_definition}+ [ETN_BLOCK_CLOSE] [ETN_SEMICOLON]
 
 ;****** BlendState ******
 bs_array=[ETN_ID] [ETN_BRACES_OPEN][ETN_CONST_INT][ETN_BRACES_CLOSE] [ETN_OP_ASSIGN] {const_expression}
-bs_definition=(([ETN_ID] [ETN_OP_ASSIGN] {const_expression}) | {bs_array}) 
-kw_blendstate=[ETN_KW_BLENDSTATE] [ETN_ID] [ETN_BLOCK_OPEN] ({bs_definition} [ETN_SEMICOLON])+ [ETN_BLOCK_CLOSE] [ETN_SEMICOLON]
+bs_definition=(([ETN_ID] [ETN_OP_ASSIGN] {const_expression}) | {bs_array}) [ETN_SEMICOLON]
+kw_blendstate=[ETN_KW_BLENDSTATE] [ETN_ID] [ETN_BLOCK_OPEN] {bs_definition}+ [ETN_BLOCK_CLOSE] [ETN_SEMICOLON]
 
 ;****** DepthStencilState ******
-dss_definition=[ETN_ID] [ETN_OP_ASSIGN] {const_expression}
-kw_depthstencilstate=[ETN_KW_DEPTHSTENCILSTATE] [ETN_ID] [ETN_BLOCK_OPEN] ({dss_definition} [ETN_SEMICOLON])+ [ETN_BLOCK_CLOSE] [ETN_SEMICOLON]
+dss_definition=[ETN_ID] [ETN_OP_ASSIGN] {const_expression} [ETN_SEMICOLON]
+kw_depthstencilstate=[ETN_KW_DEPTHSTENCILSTATE] [ETN_ID] [ETN_BLOCK_OPEN] {dss_definition}+ [ETN_BLOCK_CLOSE] [ETN_SEMICOLON]
 
 
 ;****** Pass ******
@@ -155,6 +156,4 @@ kw_pass=[ETN_KW_PASS] [ETN_ID] [ETN_BLOCK_OPEN] {pass_definition}+ [ETN_BLOCK_CL
 
 ;****** technique ******
 kw_technique=[ETN_KW_TECH] [ETN_ID] [ETN_BLOCK_OPEN] {kw_pass}+ [ETN_BLOCK_CLOSE]
-
-
 

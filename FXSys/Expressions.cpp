@@ -1998,28 +1998,30 @@ void CExpCompiler::SetRSVar(TToken *aTokens,int nAllT)
 	_strlwr_s((char *)s.c_str(),s.length()+1);
 	for (nVarName=0;nVarName<_countof(asVars) && strcmp(s.c_str(),asVars[nVarName]);++nVarName);
 
+	TToken *pExpr=aTokens+2;
+	int nAllExprT=nAllT-3;
 
 	switch (nVarName)
 	{
-		case 0:RS.FillMode=(FX_FILL_MODE)(int)ParseConstExpression(aTokens+2,nAllT-2,this,"FX_FILL");
+		case 0:RS.FillMode=(FX_FILL_MODE)(int)ParseConstExpression(pExpr,nAllExprT,this,"FX_FILL");
 			break;
-		case 1:RS.CullMode=(FX_CULL_MODE)(int)ParseConstExpression(aTokens+2,nAllT-2,this,"FX_CULL");
+		case 1:RS.CullMode=(FX_CULL_MODE)(int)ParseConstExpression(pExpr,nAllExprT,this,"FX_CULL");
 			break;
-		case 2:RS.FrontCounterClockwise=(bool)ParseConstExpression(aTokens+2,nAllT-2,this,"");
+		case 2:RS.FrontCounterClockwise=(bool)ParseConstExpression(pExpr,nAllExprT,this,"");
 			break;
-		case 3:RS.DepthBias=ParseConstExpression(aTokens+2,nAllT-2,this);
+		case 3:RS.DepthBias=ParseConstExpression(pExpr,nAllExprT,this);
 			break;
-		case 4:RS.DepthBiasClamp=ParseConstExpression(aTokens+2,nAllT-2,this);
+		case 4:RS.DepthBiasClamp=ParseConstExpression(pExpr,nAllExprT,this);
 			break;
-		case 5:RS.SlopeScaledDepthBias=ParseConstExpression(aTokens+2,nAllT-2,this);
+		case 5:RS.SlopeScaledDepthBias=ParseConstExpression(pExpr,nAllExprT,this);
 			break;
-		case 6:RS.DepthClipEnable=(bool)ParseConstExpression(aTokens+2,nAllT-2,this,"");
+		case 6:RS.DepthClipEnable=(bool)ParseConstExpression(pExpr,nAllExprT,this,"");
 			break;
-		case 7:RS.ScissorEnable=(bool)ParseConstExpression(aTokens+2,nAllT-2,this,"");
+		case 7:RS.ScissorEnable=(bool)ParseConstExpression(pExpr,nAllExprT,this,"");
 			break;
-		case 8:RS.MultisampleEnable=(bool)ParseConstExpression(aTokens+2,nAllT-2,this,"");
+		case 8:RS.MultisampleEnable=(bool)ParseConstExpression(pExpr,nAllExprT,this,"");
 			break;
-		case 9:RS.AntialiasedLineEnable=(bool)ParseConstExpression(aTokens+2,nAllT-2,this,"");
+		case 9:RS.AntialiasedLineEnable=(bool)ParseConstExpression(pExpr,nAllExprT,this,"");
 			break;
 
 		default:Error(EERR_UNDEFINED_ID,aTokens[0].sText);
@@ -2382,28 +2384,31 @@ void CExpCompiler::SetSamplerVar(TToken *aTokens,int nAllT)
 
 	_strlwr_s((char *)s.c_str(),s.length()+1);
 	for (nVarName=0;nVarName<_countof(asVars) && strcmp(s.c_str(),asVars[nVarName]);++nVarName);
-		
+	
+	TToken *pExpr=aTokens+2;
+	int nAllExprT=nAllT-3;
+
 	switch (nVarName)
 	{
-		case 0:S.Filter=(FX_FILTER)(int)ParseConstExpression(aTokens+2,nAllT-2,this,"FX_FILTER");
+		case 0:S.Filter=(FX_FILTER)(int)ParseConstExpression(pExpr,nAllExprT,this,"FX_FILTER");
 			break;
-		case 1:S.AddressU=(FX_TEXTURE_ADDRESS_MODE)(int)ParseConstExpression(aTokens+2,nAllT-2,this,"FX_TEXTURE_ADDRESS");
+		case 1:S.AddressU=(FX_TEXTURE_ADDRESS_MODE)(int)ParseConstExpression(pExpr,nAllExprT,this,"FX_TEXTURE_ADDRESS");
 			break;
-		case 2:S.AddressV=(FX_TEXTURE_ADDRESS_MODE)(int)ParseConstExpression(aTokens+2,nAllT-2,this,"FX_TEXTURE_ADDRESS");
+		case 2:S.AddressV=(FX_TEXTURE_ADDRESS_MODE)(int)ParseConstExpression(pExpr,nAllExprT,this,"FX_TEXTURE_ADDRESS");
 			break;
-		case 3:S.AddressW=(FX_TEXTURE_ADDRESS_MODE)(int)ParseConstExpression(aTokens+2,nAllT-2,this,"FX_TEXTURE_ADDRESS");
+		case 3:S.AddressW=(FX_TEXTURE_ADDRESS_MODE)(int)ParseConstExpression(pExpr,nAllExprT,this,"FX_TEXTURE_ADDRESS");
 			break;
-		case 4:S.MipLODBias=ParseConstExpression(aTokens+2,nAllT-2,this);
+		case 4:S.MipLODBias=ParseConstExpression(pExpr,nAllExprT,this);
 			break;
-		case 5:S.MaxAnisotropy=ParseConstExpression(aTokens+2,nAllT-2,this);
+		case 5:S.MaxAnisotropy=ParseConstExpression(pExpr,nAllExprT,this);
 			break;
-		case 6:S.ComparisonFunc=(FX_COMPARISON_FUNC)(int)ParseConstExpression(aTokens+2,nAllT-2,this,"FX_COMPARISON");
+		case 6:S.ComparisonFunc=(FX_COMPARISON_FUNC)(int)ParseConstExpression(pExpr,nAllExprT,this,"FX_COMPARISON");
 			break;
-		case 7:S.BorderColor=(unsigned int)ParseConstExpression(aTokens+2,nAllT-2,this);
+		case 7:S.BorderColor=(unsigned int)ParseConstExpression(pExpr,nAllExprT,this);
 			break;
-		case 8:S.MinLOD=ParseConstExpression(aTokens+2,nAllT-2,this);
+		case 8:S.MinLOD=ParseConstExpression(pExpr,nAllExprT,this);
 			break;
-		case 9:S.MaxLOD=ParseConstExpression(aTokens+2,nAllT-2,this);
+		case 9:S.MaxLOD=ParseConstExpression(pExpr,nAllExprT,this);
 			break;
 
 		default:Error(EERR_UNDEFINED_ID,aTokens[0].sText);
@@ -2518,33 +2523,36 @@ void CExpCompiler::SetBSVar(TToken *aTokens,int nAllT)
 	_strlwr_s((char *)s.c_str(),s.length()+1);
 	for (nVarName=0;nVarName<_countof(asVars) && strcmp(s.c_str(),asVars[nVarName]);++nVarName);
 
+	TToken *pExpr=aTokens+2;
+	int nAllExprT=nAllT-3;
+
 	switch (nVarName)
 	{
-		case 0:BS.AlphaToCoverageEnable=(bool)ParseConstExpression(aTokens+2,nAllT-2,this,"");
+		case 0:BS.AlphaToCoverageEnable=(bool)ParseConstExpression(pExpr,nAllExprT,this,"");
 			break;
 
-		case 1:BS.BlendEnable[min((int)GetComValue(pConst->sText),_countof(BS.BlendEnable))]=(bool)ParseConstExpression(aTokens+5,nAllT-5,this,"");
+		case 1:BS.BlendEnable[min((int)GetComValue(pConst->sText),_countof(BS.BlendEnable))]=(bool)ParseConstExpression(aTokens+5,nAllT-6,this,"");
 			break;
 
-		case 2:BS.SrcBlend=(FX_BLEND)(int)ParseConstExpression(aTokens+2,nAllT-2,this,"FX_BLEND");
+		case 2:BS.SrcBlend=(FX_BLEND)(int)ParseConstExpression(pExpr,nAllExprT,this,"FX_BLEND");
 			break;
 
-		case 3:BS.DestBlend=(FX_BLEND)(int)ParseConstExpression(aTokens+2,nAllT-2,this,"FX_BLEND");
+		case 3:BS.DestBlend=(FX_BLEND)(int)ParseConstExpression(pExpr,nAllExprT,this,"FX_BLEND");
 			break;
 
-		case 4:BS.BlendOp=(FX_BLEND_OP)(int)ParseConstExpression(aTokens+2,nAllT-2,this,"FX_BLEND_OP");
+		case 4:BS.BlendOp=(FX_BLEND_OP)(int)ParseConstExpression(pExpr,nAllExprT,this,"FX_BLEND_OP");
 			break;
 
-		case 5:BS.SrcBlendAlpha=(FX_BLEND)(int)ParseConstExpression(aTokens+2,nAllT-2,this,"FX_BLEND");
+		case 5:BS.SrcBlendAlpha=(FX_BLEND)(int)ParseConstExpression(pExpr,nAllExprT,this,"FX_BLEND");
 			break;
 
-		case 6:BS.DestBlendAlpha=(FX_BLEND)(int)ParseConstExpression(aTokens+2,nAllT-2,this,"FX_BLEND");
+		case 6:BS.DestBlendAlpha=(FX_BLEND)(int)ParseConstExpression(pExpr,nAllExprT,this,"FX_BLEND");
 			break;
 
-		case 7:BS.BlendOpAlpha=(FX_BLEND_OP)(int)ParseConstExpression(aTokens+2,nAllT-2,this,"FX_BLEND_OP");
+		case 7:BS.BlendOpAlpha=(FX_BLEND_OP)(int)ParseConstExpression(pExpr,nAllExprT,this,"FX_BLEND_OP");
 			break;
 
-		case 8:BS.RenderTargetWriteMask[min((int)GetComValue(pConst->sText),_countof(BS.RenderTargetWriteMask))]=(int)ParseConstExpression(aTokens+5,nAllT-5,this,"");
+		case 8:BS.RenderTargetWriteMask[min((int)GetComValue(pConst->sText),_countof(BS.RenderTargetWriteMask))]=(int)ParseConstExpression(aTokens+5,nAllT-6,this,"");
 			break;
 
 		default:Error(EERR_UNDEFINED_ID,aTokens[0].sText);
@@ -2576,38 +2584,40 @@ void CExpCompiler::SetDSSVar(TToken *aTokens,int nAllT)
 	_strlwr_s((char *)s.c_str(),s.length()+1);
 	for (nVarName=0;nVarName<_countof(asVars) && strcmp(s.c_str(),asVars[nVarName]);++nVarName);
 
+	TToken *pExpr=aTokens+2;
+	int nAllExprT=nAllT-3;
 
 	switch (nVarName)
 	{
-		case 0:DSS.DepthEnable=(bool)ParseConstExpression(aTokens+2,nAllT-2,this,"");
+		case 0:DSS.DepthEnable=(bool)ParseConstExpression(pExpr,nAllExprT,this,"");
 			break;
-		case 1:DSS.DepthWriteMask=(FX_DEPTH_WRITE_MASK)(int)ParseConstExpression(aTokens+2,nAllT-2,this,"");
+		case 1:DSS.DepthWriteMask=(FX_DEPTH_WRITE_MASK)(int)ParseConstExpression(pExpr,nAllExprT,this,"");
 			break;
-		case 2:DSS.DepthFunc=(FX_COMPARISON_FUNC)(int)ParseConstExpression(aTokens+2,nAllT-2,this,"FX_COMPARISON");
+		case 2:DSS.DepthFunc=(FX_COMPARISON_FUNC)(int)ParseConstExpression(pExpr,nAllExprT,this,"FX_COMPARISON");
 			break;
-		case 3:DSS.StencilEnable=(bool)ParseConstExpression(aTokens+2,nAllT-2,this,"");
+		case 3:DSS.StencilEnable=(bool)ParseConstExpression(pExpr,nAllExprT,this,"");
 			break;
-		case 4:DSS.StencilReadMask=(int)ParseConstExpression(aTokens+2,nAllT-2,this);
+		case 4:DSS.StencilReadMask=(int)ParseConstExpression(pExpr,nAllExprT,this);
 			break;
-		case 5:DSS.StencilWriteMask=(int)ParseConstExpression(aTokens+2,nAllT-2,this);
-			break;
-
-		case 6:DSS.FrontFace.StencilFailOp=(FX_STENCIL_OP)(int)ParseConstExpression(aTokens+2,nAllT-2,this,"FX_STENCIL_OP");
-			break;
-		case 7:DSS.FrontFace.StencilDepthFailOp=(FX_STENCIL_OP)(int)ParseConstExpression(aTokens+2,nAllT-2,this,"FX_STENCIL_OP");
-			break;
-		case 8:DSS.FrontFace.StencilPassOp=(FX_STENCIL_OP)(int)ParseConstExpression(aTokens+2,nAllT-2,this,"FX_STENCIL_OP");
-			break;
-		case 9:DSS.FrontFace.StencilFunc=(FX_COMPARISON_FUNC)(int)ParseConstExpression(aTokens+2,nAllT-2,this,"FX_COMPARISON");
+		case 5:DSS.StencilWriteMask=(int)ParseConstExpression(pExpr,nAllExprT,this);
 			break;
 
-		case 10:DSS.BackFace.StencilFailOp=(FX_STENCIL_OP)(int)ParseConstExpression(aTokens+2,nAllT-2,this,"FX_STENCIL_OP");
+		case 6:DSS.FrontFace.StencilFailOp=(FX_STENCIL_OP)(int)ParseConstExpression(pExpr,nAllExprT,this,"FX_STENCIL_OP");
 			break;
-		case 11:DSS.BackFace.StencilDepthFailOp=(FX_STENCIL_OP)(int)ParseConstExpression(aTokens+2,nAllT-2,this,"FX_STENCIL_OP");
+		case 7:DSS.FrontFace.StencilDepthFailOp=(FX_STENCIL_OP)(int)ParseConstExpression(pExpr,nAllExprT,this,"FX_STENCIL_OP");
 			break;
-		case 12:DSS.BackFace.StencilPassOp=(FX_STENCIL_OP)(int)ParseConstExpression(aTokens+2,nAllT-2,this,"FX_STENCIL_OP");
+		case 8:DSS.FrontFace.StencilPassOp=(FX_STENCIL_OP)(int)ParseConstExpression(pExpr,nAllExprT,this,"FX_STENCIL_OP");
 			break;
-		case 13:DSS.BackFace.StencilFunc=(FX_COMPARISON_FUNC)(int)ParseConstExpression(aTokens+2,nAllT-2,this,"FX_COMPARISON");
+		case 9:DSS.FrontFace.StencilFunc=(FX_COMPARISON_FUNC)(int)ParseConstExpression(pExpr,nAllExprT,this,"FX_COMPARISON");
+			break;
+
+		case 10:DSS.BackFace.StencilFailOp=(FX_STENCIL_OP)(int)ParseConstExpression(pExpr,nAllExprT,this,"FX_STENCIL_OP");
+			break;
+		case 11:DSS.BackFace.StencilDepthFailOp=(FX_STENCIL_OP)(int)ParseConstExpression(pExpr,nAllExprT,this,"FX_STENCIL_OP");
+			break;
+		case 12:DSS.BackFace.StencilPassOp=(FX_STENCIL_OP)(int)ParseConstExpression(pExpr,nAllExprT,this,"FX_STENCIL_OP");
+			break;
+		case 13:DSS.BackFace.StencilFunc=(FX_COMPARISON_FUNC)(int)ParseConstExpression(pExpr,nAllExprT,this,"FX_COMPARISON");
 			break;
 
 		default:Error(EERR_UNDEFINED_ID,aTokens[0].sText);
