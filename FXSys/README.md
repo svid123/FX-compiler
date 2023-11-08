@@ -153,9 +153,11 @@ Shader model 6.0 and higher does not support global initializers, so FXSys colle
 ### Example of global initializers:
 ```
 #define VAR_MULTIPLIER 2.0f
+#define BIT_COUNT 14
 
 typedef float4 color4;
 
+uint g_uBitMask=(0x1<<BIT_COUNT)-1;
 float g_fVar = 14.0f*VAR_MULTIPLIER;
 
 color4 g_avColors[3] = {color4(1,1,1,1),color4(1,1,1,1),color4(1,1,1,1)};
