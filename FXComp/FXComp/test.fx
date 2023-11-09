@@ -1,5 +1,10 @@
+#define FN(a)	\
+a/10;	\
+
+int a=FN(5);
+
 typedef static const int TT,HH;
-const int vec=10;
+
 
 TT CS_FRONT=0,
 			CS_RIGHT=1,
