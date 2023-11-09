@@ -25,7 +25,6 @@ using namespace fx;
 #define COMPILER_VERSION 0
 
 #define MUTE_GLOBAL_INITIALIZERS
-//#define COMPILE_FILE "_comp_test_"
 
 #define EXPLOG_FILENAME "fxerr.log"
 

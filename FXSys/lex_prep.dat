@@ -7,7 +7,7 @@
 {any_chars_linecom}=['\x1'-'\xff' ^'\n']
 {str_chars}=['\x1'-'\xff' ^'\r''\n''"']
 {file_str_chars}=['\x1'-'\xff' ^'\r''\n'>\]
-{rest_chars}=['!''%'-"'" '*''+' '-'-'?' '['-'^' '{'-'~' ^'\\']
+{rest_chars}=['!''%'-"'" '*''+' '-''.' '0'-'?' '['-'^' '{'-'~' ^'\\']
 
 
 [ETN_INVALID]={inv_chars}+
@@ -28,6 +28,7 @@
 [ETN_PREP_REST]={rest_chars}+
 [ETN_PREP_NEWLINE_STOP]='\n' | ('\r''\n')
 [ETN_PREP_SLASH,'\\']='\\'
+[ETN_PREP_DIV, /]=	'/'
 
 
 
