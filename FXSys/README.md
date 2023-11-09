@@ -156,12 +156,12 @@ Shader model 6.0 and higher does not support global initializers, so FXSys colle
 #define VAR_MULTIPLIER 2.0f
 #define BIT_COUNT 14
 
-typedef float4 color4;
+typedef float4 TColorArray[3];
 
 uint g_uBitMask=(0x1<<BIT_COUNT)-1;
 float g_fVar = 14.0f*VAR_MULTIPLIER;
 
-color4 g_avColors[3] = {color4(1,1,1,1),color4(1,1,1,1),color4(1,1,1,1)};
+TColorArray g_avColor = {float4(1,1,1,1),float4(1,1,1,1),float4(1,1,1,1)};
 
 float2x2 g_amRotations[2][2] = {{float2x2(1,0,0,-1),float2x2(0,-1,1,0)},
 				{float2x2(1,1,1,1),float2x2(0,0,0,0)}};
