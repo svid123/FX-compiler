@@ -1418,13 +1418,35 @@ void CExpCompiler::onSuccessRuleState(CPState *pState,SExpRuleState *aStatesStac
 
 		case ERULE_init_list:if (m_sNewGlobalID.length() && m_bParseIDInit)
 							{
+								if (pCurRS->nState==0)
+								{
+									_ASSERTE(!m_anVarPointers.size());
+
+									if (!m_anVarPointers.size())
+									{
+										std::vector<int> anDimSizes;
+										m_pGlobalIDType->Unroll(&anDimSizes);
+
+										if (!anDimSizes.size())
+										{
+											m_anVarPointers.push_back(0);
+											m_aVarInitItems.resize(1);
+										}
+										else								
+										{
+											m_anVarPointers.resize(anDimSizes.size());
+
+											int nSize=1;
+											for (int sz:	anDimSizes)
+												nSize*=sz;
+
+											m_aVarInitItems.resize(nSize);
+										}
+									}
+								}
 #ifdef MUTE_GLOBAL_INITIALIZERS
 								if (pCurRS->nState==0)
 								{
-			/*char p[256];
-			sprintf_s(p,"IGNORE: %s\n",m_sNewGlobalID.c_str());
-			OutputDebugStringA(p);*/
-
 									m_aIgnoreWriteTokens.emplace_back(std::make_pair(pFirstT,pFirstT));
 								}
 								else
@@ -1438,29 +1460,6 @@ void CExpCompiler::onSuccessRuleState(CPState *pState,SExpRuleState *aStatesStac
 
 		case ERULE_init_block:if (m_sNewGlobalID.length() && m_bParseIDInit)
 							{
-								if (!m_anVarPointers.size())
-								{
-									std::vector<int> anDimSizes;
-									m_pGlobalIDType->Unroll(&anDimSizes);
-
-									if (!anDimSizes.size())
-									{
-										m_anVarPointers.push_back(0);
-										m_aVarInitItems.resize(1);
-									}
-									else								
-									{
-										m_anVarPointers.resize(anDimSizes.size());
-
-										int nSize=1;
-										for (int sz:	anDimSizes)
-											nSize*=sz;
-
-										m_aVarInitItems.resize(nSize);
-									}
-								}
-
-
 								if (pCurRS->nState==0)
 								{										
 									m_nCurrentGlobalVarInitDim++;
@@ -1473,9 +1472,6 @@ void CExpCompiler::onSuccessRuleState(CPState *pState,SExpRuleState *aStatesStac
 								else
 								if (pCurRS->nState==2)
 								{
-									//if (m_anVarPointers[m_nCurrentGlobalVarInitDim]==0)
-										//SetGlobalVarZeroData(m_nCurrentGlobalVarInitDim-1);
-
 									m_nCurrentGlobalVarInitDim--;
 									if (m_nCurrentGlobalVarInitDim>=0)
 										m_anVarPointers[m_nCurrentGlobalVarInitDim]++;
@@ -1837,28 +1833,6 @@ void CExpCompiler::onSuccessRule(CPState *pState,SExpRuleState *aStatesStack,int
 
 		case ERULE_init_data:if (m_sNewGlobalID.length() && m_bParseIDInit)
 							{
-								std::vector<int> anDimSizes;
-								m_pGlobalIDType->Unroll(&anDimSizes);
-
-								if (!anDimSizes.size() && !m_anVarPointers.size())
-								{
-									m_anVarPointers.push_back(0);
-									m_aVarInitItems.resize(1);
-								}
-								/*
-								else
-								if (!m_anVarPointers.size())	// ???, Possible not necessary since init data arrays without init_block is impossible
-								{
-									m_anVarPointers.resize(m_anIDDimSizes.size());
-
-									int nSize=1;
-									for (int sz:	m_anIDDimSizes)
-										nSize*=sz;
-
-									m_aVarInitItems.resize(nSize);
-								}
-								*/
-
 								AddGlobalVarInitData(pFirstT,nAllT);
 							}
 							else
@@ -2099,7 +2073,6 @@ void CExpCompiler::BeginIDDef(TToken *pToken)
 {
 	m_sNewGlobalID="";
 	m_pGlobalIDType=0;
-	m_bParseIDInit=true;
 
 	if (m_pGlobalIDBaseType)
 	{
@@ -2109,7 +2082,11 @@ void CExpCompiler::BeginIDDef(TToken *pToken)
 		m_anVarPointers.clear();
 		m_aVarInitItems.clear();
 		m_nCurrentGlobalVarInitDim=-1;
+		m_bParseIDInit=true;
 	}
+	else
+		m_bParseIDInit=false;
+
 
 	if (m_nCurrentVarAttr)
 		m_pOutStream->mVarsAttrs[pToken->sText]=m_nCurrentVarAttr;
