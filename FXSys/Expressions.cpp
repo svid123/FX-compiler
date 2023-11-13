@@ -54,6 +54,26 @@ bool fnc_##op##_##type(SComValue *pA,SComValue *pB)		\
 
 
 
+unsigned int CExpCompiler::SConstVector::getAllVals()
+{
+	_ASSERTE(pType);
+	return (unsigned int)(max(pType->GetDimsX(),1)*max(pType->GetDimsY(),1));
+}
+
+void CExpCompiler::SConstVector::addMissingData()
+{
+	if (pType)
+	{
+		unsigned int uMaxVals=getAllVals();
+
+		if (!aVals.size())
+			aVals.push_back(0.0f);
+
+		while (aVals.size()<uMaxVals)
+			aVals.push_back(aVals.back());
+	}
+}
+
 CExpCompiler::STokenStream::~STokenStream()
 {
 	for (char *ptr:	apCharBuffers)
@@ -1431,8 +1451,9 @@ void CExpCompiler::onSuccessRuleState(CPState *pState,SExpRuleState *aStatesStac
 										{
 											m_anVarPointers.push_back(0);
 											m_aVarInitItems.resize(1);
+											m_nCurrentGlobalVarInitDim=0;
 										}
-										else								
+										else
 										{
 											m_anVarPointers.resize(anDimSizes.size());
 
@@ -1460,20 +1481,26 @@ void CExpCompiler::onSuccessRuleState(CPState *pState,SExpRuleState *aStatesStac
 
 		case ERULE_init_block:if (m_sNewGlobalID.length() && m_bParseIDInit)
 							{
-								if (pCurRS->nState==0)
+								if (pCurRS->nState==0)	//{
 								{										
 									m_nCurrentGlobalVarInitDim++;
 
 									if ((size_t)m_nCurrentGlobalVarInitDim<m_anVarPointers.size())
 										m_anVarPointers[m_nCurrentGlobalVarInitDim]=0;
 									else
+									if ((size_t)m_nCurrentGlobalVarInitDim>m_anVarPointers.size())	//for "aggregate type as array" init
 										Error(EERR_TOO_MANY_INIT,m_sNewGlobalID.c_str());
 								}
 								else
-								if (pCurRS->nState==2)
+								if (pCurRS->nState==2)	//}
 								{
+									bool bAggregateAsArrayInit=(size_t)m_nCurrentGlobalVarInitDim==m_anVarPointers.size();
+
+									if (bAggregateAsArrayInit)
+										AddGlobalVarInitData(m_cvInit);
+
 									m_nCurrentGlobalVarInitDim--;
-									if (m_nCurrentGlobalVarInitDim>=0)
+									if (m_nCurrentGlobalVarInitDim>=0 && !bAggregateAsArrayInit && (size_t)m_nCurrentGlobalVarInitDim<m_anVarPointers.size())
 										m_anVarPointers[m_nCurrentGlobalVarInitDim]++;
 								}
 							}
@@ -1833,7 +1860,23 @@ void CExpCompiler::onSuccessRule(CPState *pState,SExpRuleState *aStatesStack,int
 
 		case ERULE_init_data:if (m_sNewGlobalID.length() && m_bParseIDInit)
 							{
-								AddGlobalVarInitData(pFirstT,nAllT);
+								if ((size_t)m_nCurrentGlobalVarInitDim<m_anVarPointers.size())
+								{	
+									if (ReadConstVector(pFirstT,nAllT,m_cvInit))
+										AddGlobalVarInitData(m_cvInit);
+								}
+								else //Aggregate values inited as arrays
+								{
+									m_cvInit.pType=dynamic_cast<const CVectorType *>(m_pGlobalIDType->Unroll());
+
+									if (m_cvInit.aVals.size()<m_cvInit.getAllVals())
+									{
+										m_cvInit.aVals.resize(m_cvInit.aVals.size()+1);
+										m_cvInit.aVals.back()=ParseConstExpression(pFirstT,nAllT,this);
+									}
+									else
+										Error(EERR_TOO_MANY_INIT,m_sNewGlobalID.c_str());
+								}
 							}
 							else
 							{
@@ -2081,6 +2124,7 @@ void CExpCompiler::BeginIDDef(TToken *pToken)
 		m_anIDDimSizes.clear();
 		m_anVarPointers.clear();
 		m_aVarInitItems.clear();
+		m_cvInit.clear();
 		m_nCurrentGlobalVarInitDim=-1;
 		m_bParseIDInit=true;
 	}
@@ -2154,7 +2198,7 @@ void CExpCompiler::AddNewInitedVar()
 }
 
 
-void CExpCompiler::AddGlobalVarInitData(TToken *aTokens,int nAllT)
+void CExpCompiler::AddGlobalVarInitData(SConstVector &cv)
 {
 	int ptr=0;
 	int stride=1;
@@ -2182,47 +2226,48 @@ void CExpCompiler::AddGlobalVarInitData(TToken *aTokens,int nAllT)
 	}
 	
 	SConstVector &rCV=m_aVarInitItems[ptr];
-	SConstVector cv;
-	if (ReadConstVector(aTokens,nAllT,cv))
-	{
-		const CVectorType *pVT=dynamic_cast<const CVectorType *>(m_pGlobalIDType->Unroll());
-		int nAllVals=max(pVT->GetDimsX(),1)*max(pVT->GetDimsY(),1);
-		int nSrcValsNumber=max(cv.pType->GetDimsX(),1)*max(cv.pType->GetDimsY(),1);
+	const CVectorType *pVT=dynamic_cast<const CVectorType *>(m_pGlobalIDType->Unroll());
+	unsigned int uAllVals=(unsigned int)(max(pVT->GetDimsX(),1)*max(pVT->GetDimsY(),1));
 	
-		rCV.pType=cv.pType;
+	if (!cv.pType)
+		cv.pType=pVT;
 
-		if (nSrcValsNumber==1)
-		{
-			for (int n=0;n<nAllVals;++n)
-				rCV.aVals[n]=cv.aVals[0];
-		}
-		else
-		if (nSrcValsNumber==nAllVals)
-		{
-			for (int n=0;n<nAllVals;++n)
-				rCV.aVals[n]=cv.aVals[n];
-		}
-		else
-			Error(EERR_TYPE_MISMATCH,cv.pType->GetName().c_str(),m_pGlobalIDBaseType->GetName().c_str());
+	rCV.aVals.resize(uAllVals);
+	rCV.pType=cv.pType;
+	cv.addMissingData();
+
+	unsigned int uSrcValsNumber=cv.getAllVals();
+
+	if (uSrcValsNumber==1)
+	{
+		for (unsigned int n=0;n<uAllVals;++n)
+			rCV.aVals[n]=cv.aVals[0];
 	}
-
+	else
+	if (uSrcValsNumber==uAllVals)
+	{
+		for (unsigned int n=0;n<uAllVals;++n)
+			rCV.aVals[n]=cv.aVals[n];
+	}
+	else
+		Error(EERR_TYPE_MISMATCH,cv.pType->GetName().c_str(),m_pGlobalIDBaseType->GetName().c_str());
 
 	m_anVarPointers.back()++;
+
+	cv.clear();
 }
 
 bool CExpCompiler::ReadConstVector(TToken *aTokens,int nAllT,SConstVector &rDest)
 {
-	PBaseType pBaseType;
+	PBaseType pConstructType=(aTokens[0].T==ETN_ID?FindType(aTokens[0].sText):PBaseType());
 	const CVectorType *pType=0;
 	bool bRet=true;
 	std::vector<int> anDimSizes;
 	int nTotalSize=1;
 
-	pBaseType=FindType(aTokens[0].sText);
 		
-	pType=dynamic_cast<const CVectorType *>(pBaseType.get());
-	if (!pType && pBaseType)
-		pType=dynamic_cast<const CVectorType *>(pBaseType->Unroll(&anDimSizes));
+	if (pConstructType)
+		pType=dynamic_cast<const CVectorType *>(pConstructType->Unroll(&anDimSizes));
 
 	for (int nSZ:	anDimSizes)
 		nTotalSize*=nSZ;
@@ -2235,6 +2280,7 @@ bool CExpCompiler::ReadConstVector(TToken *aTokens,int nAllT,SConstVector &rDest
 	else
 	if (!pType)
 	{
+		rDest.aVals.resize(1);
 		SComValue &cv=rDest.aVals[0];
 
 		cv=ParseConstExpression(aTokens,nAllT,this);
@@ -2256,8 +2302,7 @@ bool CExpCompiler::ReadConstVector(TToken *aTokens,int nAllT,SConstVector &rDest
 	else
 	{
 		int ptr=1;
-		int cnt=0;
-		int nMaxVals=max(pType->GetDimsX(),1)*max(pType->GetDimsY(),1);
+		unsigned int uMaxVals=(unsigned int)(max(pType->GetDimsX(),1)*max(pType->GetDimsY(),1));
 
 		if (ptr<nAllT && aTokens[ptr].T==ETN_BRACEC_OPEN)
 		{
@@ -2269,9 +2314,11 @@ bool CExpCompiler::ReadConstVector(TToken *aTokens,int nAllT,SConstVector &rDest
 
 				if (nLevel==1 && pT->T==ETN_COMMA)
 				{
-					if (cnt<nMaxVals)
+					if (rDest.aVals.size()<uMaxVals)
 					{
-						SComValue &rCV=rDest.aVals[cnt++];
+						rDest.aVals.resize(rDest.aVals.size()+1);
+						SComValue &rCV=rDest.aVals.back();
+
 						rCV=ParseConstExpression(&aTokens[ptr0],ptr-ptr0,this);
 						rCV.cast(pType->GetType());
 					}
@@ -2300,9 +2347,11 @@ bool CExpCompiler::ReadConstVector(TToken *aTokens,int nAllT,SConstVector &rDest
 				bRet=false;
 			}
 			else
-			if (cnt<nMaxVals)
+			if (rDest.aVals.size()<uMaxVals)
 			{
-				SComValue &rCV=rDest.aVals[cnt++];
+				rDest.aVals.resize(rDest.aVals.size()+1);
+				SComValue &rCV=rDest.aVals.back();
+
 				rCV=ParseConstExpression(&aTokens[ptr0],ptr-ptr0,this);
 				rCV.cast(pType->GetType());				
 			}
@@ -2311,13 +2360,13 @@ bool CExpCompiler::ReadConstVector(TToken *aTokens,int nAllT,SConstVector &rDest
 				Error(EERR_TOO_MANY_INIT,m_sNewGlobalID.c_str());
 				bRet=false;
 			}
-			
+			/*
 			if (!cnt)
 				rDest.aVals[cnt++]=0.0f;
 			
 			for (;cnt<nMaxVals;++cnt)
 				rDest.aVals[cnt]=rDest.aVals[cnt-1];
-
+			*/
 			if (ptr<nAllT-1)
 			{
 				Error(EERR_UNEXPECTED_TOKEN,(char *)&aTokens[ptr+1],0);
