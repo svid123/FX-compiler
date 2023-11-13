@@ -93,7 +93,16 @@ class CExpCompiler:		public CParseHandler,public CFileHandler,CConstProvider
 	struct SConstVector
 	{
 		const CVectorType *pType;
-		SComValue aVals[4*4];	//For maximum matrix4x4 storage
+		std::vector<SComValue> aVals;
+
+		unsigned int getAllVals();
+		void addMissingData();
+
+		void clear()
+		{
+			aVals.clear();
+			pType=0;
+		}
 	};
 
 	static std::map<std::string,PBaseType> m_mPrimTypes;
@@ -229,6 +238,7 @@ private:
 	unsigned int m_uGlobalVarQualifier;
 	std::vector<int> m_anVarPointers;
 	std::vector<SConstVector> m_aVarInitItems;
+	SConstVector m_cvInit;
 	int m_nCurrentVarAttr;
 	std::set<TToken *> m_sStringConversionTokens;
 
@@ -339,7 +349,7 @@ private:
 	void DefineNewTypeID(TToken *aTokens,int nAllT);
 
 	void SetTypeQualifier(TToken *pToken);
-	void AddGlobalVarInitData(TToken *aTokens,int nAllT);
+	void AddGlobalVarInitData(SConstVector &vec);
 	void AddNewInitedVar();
 	bool ReadConstVector(TToken *aTokens,int nAllT,SConstVector &rDest);
 

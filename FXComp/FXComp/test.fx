@@ -1,20 +1,16 @@
-#define FN(a)	\
-a/10;	\
+float2 vec0[3] = { {1,2},float2(3,4),9};
 
-int a=FN(5);
-
-typedef static const int TT,HH;
+float vec[3][2] = { {1, {1}}, {2,2}, {3,3}};
 
 
-TT CS_FRONT=0,
-			CS_RIGHT=1,
-			CS_BACK=2,
-			CS_LEFT=3,
-			CS_TOP=4,
-			CS_BOTTOM=5;
+typedef float2 TT;
 
-const int fn()
-{
-	int n=10;
-	return n;
-}
+float a = 10;
+float2 v=float2(1,2);
+
+float2 vec2[3] = {float2(1,2),float2(3,4),float2(5,6)},
+		vec3[3] = { {1,2},float2(3,4),9};
+
+float b,c;
+float d=20,e,f[2]={30,40};
+
