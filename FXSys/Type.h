@@ -23,7 +23,7 @@ enum TYPE_QUALIFIERS_BIT
 	TQB_SIZE
 };
 
-class CBaseType
+class CBaseType:	public std::enable_shared_from_this<CBaseType>
 {
 protected:
 	std::string m_sName;
@@ -61,12 +61,21 @@ public:
 	}
 
 	virtual const CBaseType *Unroll(std::vector<int> *panRetDimSize=0,unsigned int *puTypeQualifiers=0) const=0;
+	virtual PBaseType CreateOptimizedTree()=0;
 };
 
 class CTypedef:	public CBaseType
 {	
 	int m_nDimSize;
 	unsigned int m_uTypeQualifiers;
+
+	virtual PBaseType CreateOptimizedTree() override
+	{
+		if (m_nDimSize)
+			return PBaseType(new CTypedef(m_sName.c_str(),m_nDimSize,m_pBase->CreateOptimizedTree()));
+		else
+			return m_pBase->CreateOptimizedTree();
+	}
 public:
 	CTypedef(const char *sname,int nDimSize,PBaseType pBase,unsigned int uTypeQ=0):CBaseType(sname,pBase),
 				m_uTypeQualifiers(uTypeQ),m_nDimSize(nDimSize)
@@ -106,6 +115,7 @@ public:
 		
 		return m_pBase->Unroll(panRetDimSize,puTypeQualifiers);
 	}
+
 };
 
 class CPrimitiveType:	public CBaseType
@@ -113,6 +123,11 @@ class CPrimitiveType:	public CBaseType
 	virtual const CBaseType *Unroll(std::vector<int> *panRetDimSize=0,unsigned int *puTypeQualifiers=0) const override
 	{
 		return this;
+	}
+
+	virtual PBaseType CreateOptimizedTree() override
+	{
+		return shared_from_this();
 	}
 public:
 	CPrimitiveType(const char *name):CBaseType(name)
@@ -125,6 +140,10 @@ class CVectorType:	public CTypedef
 	CV_TYPE m_Type;
 	char m_nDimsX,m_nDimsY;
 
+	virtual PBaseType CreateOptimizedTree() override
+	{
+		return shared_from_this();
+	}
 public:
 	CVectorType(const char *sname,int T,char dimsx,char dimsy=0):m_Type((CV_TYPE)T),m_nDimsX(dimsx),m_nDimsY(dimsy),
 		CTypedef(sname,(dimsy?dimsy:dimsx),

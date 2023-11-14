@@ -1438,7 +1438,7 @@ void CExpCompiler::onSuccessRuleState(CPState *pState,SExpRuleState *aStatesStac
 
 		case ERULE_init_list:if (m_sNewGlobalID.length() && m_bParseIDInit)
 							{
-								if (pCurRS->nState==0)
+								if (pCurRS->nState==0)	//=
 								{
 									_ASSERTE(!m_anVarPointers.size());
 
@@ -2093,6 +2093,7 @@ void CExpCompiler::SetGlobalIDType(TToken *aTokens,int nAllT)
 		m_pGlobalIDBaseType=0;
 }
 
+
 void CExpCompiler::EndIDDef()
 {
 	if (m_sNewGlobalID.length() && m_pGlobalIDBaseType)
@@ -2105,6 +2106,7 @@ void CExpCompiler::EndIDDef()
 		}
 
 		m_pGlobalIDType=pType;
+		m_pGlobalIDTypeTree=pType->CreateOptimizedTree();
 
 		unsigned int uTQ=0;
 		pType->Unroll(0,&uTQ);
@@ -2209,10 +2211,9 @@ void CExpCompiler::AddGlobalVarInitData(SConstVector &cv)
 	int ptr=0;
 	int stride=1;
 	std::vector<int> anIDDimSizes;
-	const CBaseType *pBaseType;
 
 	_ASSERTE(m_pGlobalIDType);
-	pBaseType=m_pGlobalIDType->Unroll(&anIDDimSizes);
+	m_pGlobalIDType->Unroll(&anIDDimSizes);
 
 	if (!anIDDimSizes.size())
 		anIDDimSizes.push_back(1);

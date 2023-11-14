@@ -230,7 +230,8 @@ private:
 	PBaseType m_pGlobalIDBaseType;
 	std::vector<int> m_anIDDimSizes;
 	std::string m_sNewGlobalID;
-	PBaseType m_pGlobalIDType;
+	PBaseType m_pGlobalIDType,
+				m_pGlobalIDTypeTree;//Without synonyms
 	bool m_bParseIDInit;
 
 //Global vars initializers
@@ -343,6 +344,7 @@ private:
 	int WriteTokens(TToken *aTokens,int nAllT);
 	void WriteString(const char *s,int nLine);
 
+	PBaseType RemoveSynonyms(PBaseType pT);
 	void EndIDDef();
 	void BeginIDDef(TToken *pToken);
 	void SetGlobalIDType(TToken *aTokens,int nAllT);

@@ -1,9 +1,11 @@
-float2 vec0[3] = { {1,2},float2(3,4),9};
+typedef float2 TT;
+
+TT vec0[3] = { {1,2},float2(3,4),9};
 
 float vec[3][2] = { {1, {1}}, {2,2}, {3,3}};
 
 
-typedef float2 TT;
+
 
 float a = 10;
 TT v=float2(1,2);
