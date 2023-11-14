@@ -110,25 +110,18 @@ public:
 
 
 class CTypedef:	public CBaseType
-{
-	typedef std::vector<int> TADimSize;
-
-	TADimSize m_anDimSize;
+{	
+	int m_nDimSize;
 	unsigned int m_uTypeQualifiers;
 public:
-	CTypedef(const char *sname,PBaseType pBase,unsigned int uTypeQ=0):CBaseType(sname,pBase),
-				m_uTypeQualifiers(uTypeQ)
+	CTypedef(const char *sname,int nDimSize,PBaseType pBase,unsigned int uTypeQ=0):CBaseType(sname,pBase),
+				m_uTypeQualifiers(uTypeQ),m_nDimSize(nDimSize)
 	{
 	}
 
-	void AddDimSize(int n)
+	int GetDims() const
 	{
-		m_anDimSize.push_back(n);
-	}
-
-	const TADimSize &GetDims() const
-	{
-		return m_anDimSize;
+		return m_nDimSize;
 	}
 
 	unsigned int GetTypeQualifiers()
@@ -143,7 +136,7 @@ public:
 			const CTypedef *pT=dynamic_cast<const CTypedef *>(pSrc);
 
 			if (pT)
-				return m_anDimSize==pT->m_anDimSize;
+				return m_nDimSize==pT->m_nDimSize;
 		}
 
 		return false;
@@ -167,11 +160,8 @@ public:
 				if (puTypeQualifiers)
 					*puTypeQualifiers|=pTD->m_uTypeQualifiers;
 
-				if (panRetDimSize)
-				{
-					for (int nSZ:	pTD->m_anDimSize)
-						panRetDimSize->push_back(nSZ);
-				}
+				if (panRetDimSize && pTD->m_nDimSize)
+					panRetDimSize->push_back(pTD->m_nDimSize);
 			}
 
 			pRet=pT;

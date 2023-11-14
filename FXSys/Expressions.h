@@ -348,7 +348,7 @@ private:
 	void SetGlobalIDType(TToken *aTokens,int nAllT);
 	void DefineNewTypeID(TToken *aTokens,int nAllT);
 
-	void SetTypeQualifier(TToken *pToken);
+	void SetTypeQualifier(TToken *pToken,int nAllT);
 	void AddGlobalVarInitData(SConstVector &vec);
 	void AddNewInitedVar();
 	bool ReadConstVector(TToken *aTokens,int nAllT,SConstVector &rDest);
