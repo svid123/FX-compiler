@@ -25,7 +25,6 @@ enum TYPE_QUALIFIERS_BIT
 
 class CBaseType
 {
-protected:
 	std::string m_sName;
 	PBaseType m_pBase;
 
@@ -63,6 +62,53 @@ public:
 	virtual const CBaseType *Unroll(std::vector<int> *panRetDimSize=0,unsigned int *puTypeQualifiers=0) const=0;
 };
 
+class CVectorType:	public CBaseType
+{
+	CV_TYPE m_Type;
+	char m_nDimsX,m_nDimsY;
+
+public:
+	CVectorType(const char *sname,int T,char dimsx,char dimsy=0):m_Type((CV_TYPE)T),m_nDimsX(dimsx),m_nDimsY(dimsy),
+		CBaseType(sname)
+	{
+	}
+
+	CVectorType():m_Type(CV_NULL),m_nDimsX(0),m_nDimsY(0)
+	{
+	}
+
+	CV_TYPE GetType()const{return m_Type;}
+	char GetDimsX()const{return m_nDimsX;}
+	char GetDimsY()const{return m_nDimsY;}
+
+	virtual bool IsSame(const CBaseType *pSrc) const override
+	{
+		if (__super::IsSame(pSrc))
+		{
+			const CVectorType *pVT=dynamic_cast<const CVectorType *>(pSrc);
+
+			if (pVT)
+				return m_Type==pVT->m_Type && m_nDimsX==pVT->m_nDimsX && m_nDimsY==pVT->m_nDimsY;
+		}
+
+		return false;
+	}
+
+	virtual const CBaseType *Unroll(std::vector<int> *panRetDimSize=0,unsigned int *puTypeQualifiers=0) const override
+	{
+		if (puTypeQualifiers)
+			*puTypeQualifiers=0;
+
+		if (panRetDimSize)
+		{
+			panRetDimSize->clear();
+			panRetDimSize->push_back(1);
+		}
+		return this;
+	}
+};
+
+
 class CTypedef:	public CBaseType
 {	
 	int m_nDimSize;
@@ -98,67 +144,32 @@ public:
 
 	virtual const CBaseType *Unroll(std::vector<int> *panRetDimSize=0,unsigned int *puTypeQualifiers=0) const override
 	{
+		const CBaseType *pRet=0,*pT=this;
+
 		if (puTypeQualifiers)
-			*puTypeQualifiers|=m_uTypeQualifiers;
+			*puTypeQualifiers=0;
 
-		if (panRetDimSize && m_nDimSize)
-			panRetDimSize->push_back(m_nDimSize);
+		if (panRetDimSize)
+			panRetDimSize->clear();
 		
-		return m_pBase->Unroll(panRetDimSize,puTypeQualifiers);
-	}
-};
-
-class CPrimitiveType:	public CBaseType
-{
-	virtual const CBaseType *Unroll(std::vector<int> *panRetDimSize=0,unsigned int *puTypeQualifiers=0) const override
-	{
-		return this;
-	}
-public:
-	CPrimitiveType(const char *name):CBaseType(name)
-	{
-	}
-};
-
-class CVectorType:	public CTypedef
-{
-	CV_TYPE m_Type;
-	char m_nDimsX,m_nDimsY;
-
-public:
-	CVectorType(const char *sname,int T,char dimsx,char dimsy=0):m_Type((CV_TYPE)T),m_nDimsX(dimsx),m_nDimsY(dimsy),
-		CTypedef(sname,(dimsy?dimsy:dimsx),
-				(dimsy?PBaseType(new CTypedef("",dimsx,std::make_shared<CPrimitiveType>(""))):PBaseType(new CPrimitiveType(""))))
-	{
-	}
-
-	CVectorType():m_Type(CV_NULL),m_nDimsX(0),m_nDimsY(0),CTypedef("",0,0)
-	{
-	}
-
-	CV_TYPE GetType()const{return m_Type;}
-	char GetDimsX()const{return m_nDimsX;}
-	char GetDimsY()const{return m_nDimsY;}
-	/*
-	virtual bool IsSame(const CBaseType *pSrc) const override
-	{
-		if (__super::IsSame(pSrc))
+		while (pT)
 		{
-			const CVectorType *pVT=dynamic_cast<const CVectorType *>(pSrc);
+			const CTypedef *pTD=dynamic_cast<const CTypedef *>(pT);
+			if (pTD)
+			{
+				if (puTypeQualifiers)
+					*puTypeQualifiers|=pTD->m_uTypeQualifiers;
 
-			if (pVT)
-				return m_Type==pVT->m_Type && m_nDimsX==pVT->m_nDimsX && m_nDimsY==pVT->m_nDimsY;
+				if (panRetDimSize && pTD->m_nDimSize)
+					panRetDimSize->push_back(pTD->m_nDimSize);
+			}
+
+			pRet=pT;
+			pT=pT->GetBase().get();
 		}
 
-		return false;
+		return pRet;
 	}
-	
-	*/
-	virtual const CBaseType *Unroll(std::vector<int> *panRetDimSize=0,unsigned int *puTypeQualifiers=0) const override
-	{
-		return this;
-	}	
 };
-
 
 }

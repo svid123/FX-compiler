@@ -2174,7 +2174,6 @@ void CExpCompiler::AddNewInitedVar()
 
 			for (int x=0;x<nDimsX;++x,++v)
 			{
-				if (v<(int)m_aVarInitItems[n].aVals.size())
 				switch (Type)
 				{
 					case CV_INT:*(auI++)=m_aVarInitItems[n].aVals[v];
