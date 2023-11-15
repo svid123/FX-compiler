@@ -98,7 +98,7 @@ class CExpCompiler:		public CParseHandler,public CFileHandler,CConstProvider
 		unsigned int getAllVals();
 		void addMissingData();
 
-		void clear()
+		void Clear()
 		{
 			aVals.clear();
 			pType=0;
@@ -230,16 +230,53 @@ private:
 	PBaseType m_pGlobalIDBaseType;
 	std::vector<int> m_anIDDimSizes;
 	std::string m_sNewGlobalID;
-	PBaseType m_pGlobalIDType,
-				m_pGlobalIDTypeTree;//Without synonyms
 	bool m_bParseIDInit;
 
 //Global vars initializers
-	int m_nCurrentGlobalVarInitDim;
+	struct SInitDesc
+	{
+	private:
+		CExpCompiler *pOwner;
+		std::string sIDName;
+
+		//PBaseType pGlobalIDTypeTree;//Without synonyms
+
+		int nCurrentGlobalVarInitDim;
+		std::vector<int> anVarPointers;
+		std::vector<SConstVector> aVarInitItems;
+		SConstVector cvInit;
+
+		void AddGlobalVarInitData(SConstVector &vec);
+	public:
+		PBaseType pGlobalIDType;
+
+		void Clear()
+		{
+			pGlobalIDType=0;//pGlobalIDTypeTree=0;
+			nCurrentGlobalVarInitDim=-1;
+			anVarPointers.clear();
+			aVarInitItems.clear();
+			cvInit.Clear();
+			pOwner=0;
+		}
+
+		SInitDesc()
+		{
+			Clear();
+		}
+
+		void Init(CExpCompiler *pOwner,const char *sIDName);
+		
+		bool AddLevel(int nStep);
+		void PushValue(TToken *aT,int nAllT);
+
+		const std::vector<SConstVector> &GetInitItems() const
+		{
+			return aVarInitItems;
+		}
+	} m_InitDesc;
+
 	unsigned int m_uGlobalVarQualifier;
-	std::vector<int> m_anVarPointers;
-	std::vector<SConstVector> m_aVarInitItems;
-	SConstVector m_cvInit;
 	int m_nCurrentVarAttr;
 	std::set<TToken *> m_sStringConversionTokens;
 
@@ -351,7 +388,6 @@ private:
 	void DefineNewTypeID(TToken *aTokens,int nAllT);
 
 	void SetTypeQualifier(TToken *pToken,int nAllT);
-	void AddGlobalVarInitData(SConstVector &vec);
 	void AddNewInitedVar();
 	bool ReadConstVector(TToken *aTokens,int nAllT,SConstVector &rDest);
 
