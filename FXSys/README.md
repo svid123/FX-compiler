@@ -163,6 +163,8 @@ float g_fVar = 14.0f*VAR_MULTIPLIER;
 
 TColorArray g_avColor = {float4(1,1,1,1),{1,1,1,1},{1}};
 
+float2 g_avVectors[3][2] = {{1,{3,4}}, 1,float2(3,4), 1,float2(3,4)};
+
 float2x2 g_amRotations[2][2] = {{float2x2(1,0,0,-1),float2x2(0,-1,1,0)},
 				{float2x2(1,1,1,1),{} }};
 
