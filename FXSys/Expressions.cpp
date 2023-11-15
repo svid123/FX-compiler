@@ -58,7 +58,7 @@ void CExpCompiler::SInitDesc::Init(CExpCompiler *powner,const char *sIDName_)
 	pOwner=powner;
 	sIDName=sIDName_;
 
-	std::vector<int> anDimSizes;
+	anDimSizes.clear();
 	pGlobalIDType->Unroll(&anDimSizes);
 
 	_ASSERTE(!anVarPointers.size());
@@ -69,7 +69,8 @@ void CExpCompiler::SInitDesc::Init(CExpCompiler *powner,const char *sIDName_)
 	{
 		anVarPointers.push_back(0);
 		aVarInitItems.resize(1);
-		nCurrentGlobalVarInitDim=0;
+		nCurrentLevel=0;
+		anDimSizes.push_back(1);
 	}
 	else
 	{
@@ -80,19 +81,34 @@ void CExpCompiler::SInitDesc::Init(CExpCompiler *powner,const char *sIDName_)
 			nSize*=sz;
 
 		aVarInitItems.resize(nSize);
+		nCurrentLevel=-1;
 	}
+
+	anDimStride.resize(anDimSizes.size());
+	int stride=1;
+	for (int n=(int)anDimSizes.size()-1;n>=0;--n)
+	{
+		anDimStride[n]=stride;
+		stride*=anDimSizes[n];
+	}
+
+	for (auto &item:	aVarInitItems)
+		item.Clear();
 }
 
 bool CExpCompiler::SInitDesc::AddLevel(int nStep)
 {
-	nCurrentGlobalVarInitDim+=nStep;
+	nCurrentLevel+=nStep;
 
 	if (nStep>0)
 	{
-		if ((size_t)nCurrentGlobalVarInitDim<anVarPointers.size())
-			anVarPointers[nCurrentGlobalVarInitDim]=0;
+		if ((size_t)nCurrentLevel<anVarPointers.size())
+		{
+			for (int n=nCurrentLevel;n<(int)anVarPointers.size();++n)
+				anVarPointers[n]=0;
+		}
 		else
-		if ((size_t)nCurrentGlobalVarInitDim>anVarPointers.size())	//for "aggregate type as array" init
+		if ((size_t)nCurrentLevel>anVarPointers.size())	//for "aggregate type as array" init
 		{
 			pOwner->Error(EERR_TOO_MANY_INIT,sIDName.c_str());
 			return false;
@@ -100,13 +116,17 @@ bool CExpCompiler::SInitDesc::AddLevel(int nStep)
 	}
 	else
 	{
-		bool bAggregateAsArrayInit=((size_t)nCurrentGlobalVarInitDim+1==anVarPointers.size());
+		bool bAggregateAsArrayInit=((size_t)nCurrentLevel+1==anVarPointers.size());
 
 		if (bAggregateAsArrayInit)
 			AddGlobalVarInitData(cvInit);
 		
-		if (nCurrentGlobalVarInitDim>=0 && !bAggregateAsArrayInit && (size_t)nCurrentGlobalVarInitDim<anVarPointers.size())
-			anVarPointers[nCurrentGlobalVarInitDim]++;
+		if (nCurrentLevel>=0 && !bAggregateAsArrayInit && (size_t)nCurrentLevel<anVarPointers.size())
+		{
+			anVarPointers[nCurrentLevel]++;
+			for (int n=nCurrentLevel+1;n<(int)anVarPointers.size();++n)
+				anVarPointers[n]=0;
+		}
 	}
 
 	return true;
@@ -114,10 +134,23 @@ bool CExpCompiler::SInitDesc::AddLevel(int nStep)
 
 void CExpCompiler::SInitDesc::PushValue(TToken *aT,int nAllT)
 {
-	if ((size_t)nCurrentGlobalVarInitDim<anVarPointers.size())
-	{	
+	if ((size_t)nCurrentLevel<anVarPointers.size())
+	{
 		if (pOwner->ReadConstVector(aT,nAllT,cvInit))
+		{
 			AddGlobalVarInitData(cvInit);
+			
+			int n=(int)anVarPointers.size()-1;
+
+			while (n>nCurrentLevel && anVarPointers[n]>=anDimSizes[n])
+			{
+				anVarPointers[n]=0;
+				n--;
+
+				if (n>=nCurrentLevel)
+					anVarPointers[n]++;
+			}
+		}
 	}
 	else //Aggregate values inited as arrays
 	{
@@ -133,30 +166,50 @@ void CExpCompiler::SInitDesc::PushValue(TToken *aT,int nAllT)
 	}
 }
 
+void CExpCompiler::SInitDesc::DisplayItems(std::string &rsDest,int nLevel,int adr)
+{
+	rsDest+="{";
+	for (int n=0;n<anDimSizes[nLevel];++n)
+	{
+		if (nLevel==anDimSizes.size()-1)
+		{
+			char p[256];
+			if (aVarInitItems[adr+n].aVals.size())
+				_itoa_s((int)aVarInitItems[adr+n].aVals[0],p,10);
+			else
+				p[0]=0;
+
+			rsDest+=p;
+		}
+		else
+			DisplayItems(rsDest,nLevel+1,adr+n*anDimStride[nLevel]);
+
+		if (n<anDimSizes[nLevel]-1)
+			rsDest+=", ";
+	}
+	rsDest+="}";
+}
+
 void CExpCompiler::SInitDesc::AddGlobalVarInitData(SConstVector &cv)
 {
 	int ptr=0;
 	int stride=1;
-	std::vector<int> anIDDimSizes;
 
 	_ASSERTE(pGlobalIDType);
-	const CBaseType *pBaseType=pGlobalIDType->Unroll(&anIDDimSizes);
-
-	if (!anIDDimSizes.size())
-		anIDDimSizes.push_back(1);
+	const CBaseType *pBaseType=pGlobalIDType->Unroll();
 
 	for (size_t n=0;n<anVarPointers.size();++n)
-	if (anVarPointers[n]>=anIDDimSizes[n])
+	if (anVarPointers[n]>=anDimSizes[n])
 	{
 		pOwner->Error(EERR_TOO_MANY_INIT,sIDName.c_str());
 		return;
 	}
 
 
-	for (int n=(int)anIDDimSizes.size()-1;n>=0;--n)
+	for (int n=(int)anDimSizes.size()-1;n>=0;--n)
 	{
 		ptr+=anVarPointers[n]*stride;
-		stride*=anIDDimSizes[n];
+		stride*=anDimSizes[n];
 	}
 	
 	SConstVector &rCV=aVarInitItems[ptr];
@@ -2247,6 +2300,9 @@ void CExpCompiler::AddNewInitedVar()
 	int ptr=0;
 	const std::vector<SConstVector> &aVarInitItems=m_InitDesc.GetInitItems();
 
+	//std::string s;
+	//m_InitDesc.DisplayItems(s);
+
 	nXStride=(nDimsX*nItemSize+(nAlignment-1)) & ~(nAlignment-1);
 	aBuf.resize(nXStride*nDimsY*aVarInitItems.size()-(nXStride-nDimsX*nItemSize));
 
@@ -2299,6 +2355,7 @@ bool CExpCompiler::ReadConstVector(TToken *aTokens,int nAllT,SConstVector &rDest
 	std::vector<int> anDimSizes;
 	int nTotalSize=1;
 
+	rDest.Clear();
 		
 	if (pConstructType)
 		pType=dynamic_cast<const CVectorType *>(pConstructType->Unroll(&anDimSizes));

@@ -241,8 +241,8 @@ private:
 
 		//PBaseType pGlobalIDTypeTree;//Without synonyms
 
-		int nCurrentGlobalVarInitDim;
-		std::vector<int> anVarPointers;
+		int nCurrentLevel;
+		std::vector<int> anVarPointers,anDimSizes,anDimStride;
 		std::vector<SConstVector> aVarInitItems;
 		SConstVector cvInit;
 
@@ -253,7 +253,7 @@ private:
 		void Clear()
 		{
 			pGlobalIDType=0;//pGlobalIDTypeTree=0;
-			nCurrentGlobalVarInitDim=-1;
+			nCurrentLevel=-1;
 			anVarPointers.clear();
 			aVarInitItems.clear();
 			cvInit.Clear();
@@ -274,6 +274,8 @@ private:
 		{
 			return aVarInitItems;
 		}
+
+		void DisplayItems(std::string &rsDest,int nLevel=0,int adr=0);
 	} m_InitDesc;
 
 	unsigned int m_uGlobalVarQualifier;
