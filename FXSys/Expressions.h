@@ -25,6 +25,7 @@
 class CTokenMan;
 class CExpParser;
 struct ID3D10Blob;
+typedef ID3D10Blob ID3DBlob;
 
 namespace fx
 {
@@ -107,6 +108,8 @@ class CExpCompiler:		public CParseHandler,public CFileHandler,CConstProvider
 
 	static std::map<std::string,PBaseType> m_mPrimTypes;
 	std::map<std::string,PBaseType> m_mTypes;
+
+
 public:
 	typedef struct{
 					EXP_TOKEN T;
@@ -329,6 +332,27 @@ private:
 	};
 	std::unique_ptr<CPassConstProvider> m_pPassConstProvider;
 	typedef std::pair<const char *,const char *> TMacroDefinition;
+
+	struct SD3DCompileTask
+	{
+		std::vector<TMacroDefinition> *paConstMacros;
+		SFXPassGroup *pPG;
+		const char *sSource;
+		unsigned int uFlags,uShaderVer;
+		int nPassNum,nShaderNum;
+		std::string sShaderVer,sSourceName;
+
+		ID3DBlob *pCode,*pErr;
+
+		SD3DCompileTask():sSource(0),pPG(0),nPassNum(0),nShaderNum(0),paConstMacros(0),
+					pCode(0),pErr(0),uFlags(0),uShaderVer(0)
+		{
+		}
+
+		~SD3DCompileTask();
+	};
+
+	static void CompileThread(CExpCompiler *pOwner,SD3DCompileTask **apTask,size_t uAllTasks);
 
 
 	int m_nLastErrorLine,m_nBlockErrorRuleLn;

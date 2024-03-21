@@ -19,6 +19,7 @@
 #include <minmax.h>
 #include <windows.h>
 #include <algorithm>
+#include <thread>
 
 using namespace fx;
 
@@ -52,6 +53,14 @@ struct Sc##op##_##type{		\
 }g_c##op##_##type;			\
 bool fnc_##op##_##type(SComValue *pA,SComValue *pB)		\
 
+
+CExpCompiler::SD3DCompileTask::~SD3DCompileTask()
+{
+	if (pCode)
+		pCode->Release();
+	if (pErr)
+		pErr->Release();
+}
 
 void CExpCompiler::SInitDesc::Init(CExpCompiler *powner,const char *sIDName_)
 {
@@ -3069,14 +3078,41 @@ const char *CExpCompiler::GetShaderVer(int nShaderName,int ver)
 }
 
 
+void CExpCompiler::CompileThread(CExpCompiler *pOwner,SD3DCompileTask **apTask,size_t uAllTasks)
+{
+	for (size_t n=0;n<uAllTasks;++n)
+	{
+		SD3DCompileTask *pTask=apTask[n];
+		SFXPassGroup &PG=*pTask->pPG;	
+		SFXPassGroup::TEntryPointVer &EP=PG.aEntryPoints[pTask->nShaderNum];
+
+		_ASSERTE(!pTask->pCode);
+
+		if (!pOwner->D3DCompile(pTask->sSource,strlen(pTask->sSource),
+				pTask->sSourceName.c_str(),pTask->paConstMacros->size()?&(*pTask->paConstMacros)[0]:0,EP.first.c_str(),pTask->sShaderVer.c_str(),EP.second,pTask->uFlags,&pTask->pCode,&pTask->pErr))
+		{
+			if (pTask->pCode)			
+			{
+				pTask->pCode->Release();
+				pTask->pCode=0;
+			}
+		}
+	}
+}
+
 bool CExpCompiler::CompilePassGroup(const char *sSourceName_,SFXPassGroup &PG,unsigned int uFlags,const std::map<std::string,std::string> &mDefMacros)
 {
 	bool bRet=true;
-	std::vector<TMacroDefinition> aConstMacros;
+	typedef std::vector<TMacroDefinition> TAMacroDef;
+	TAMacroDef aConstMacros;
 	std::vector<std::pair<std::string,	std::tuple<int,int,int,std::string>>> aParams;
 	int nShaderNum=0;
 	std::string sSource;
 	std::vector<SFXCode::TSourceIDLine> anLineID;
+	std::vector<std::vector<std::unique_ptr<SD3DCompileTask>>> aapPassTasks;
+	std::vector<std::unique_ptr<TAMacroDef>> apPassConstMacros;
+	std::vector<SD3DCompileTask *> apTasks;
+	std::vector<std::unique_ptr<std::string>> apsMacroValue;
 
 	m_pOutStream->UnmarkAllFunctions();
 		
@@ -3127,17 +3163,47 @@ bool CExpCompiler::CompilePassGroup(const char *sSourceName_,SFXPassGroup &PG,un
 	int nSwitchedParam;
 	do
 	{
-		std::unique_ptr<SFXPass> pPass=std::make_unique<SFXPass>();
-
 		for (int n=0;n<(int)aParams.size();++n)
 		{
 			aConstMacros[nConstCount+n].first=aParams[n].first.c_str();
-			aConstMacros[nConstCount+n].second=std::get<3>(aParams[n].second).c_str();
+
+			apsMacroValue.push_back(std::make_unique<std::string>(std::get<3>(aParams[n].second)));
+			aConstMacros[nConstCount+n].second=apsMacroValue.back()->c_str();
 		}
 
-		
+		aapPassTasks.resize(aapPassTasks.size()+1);
+		aapPassTasks.back().resize(SFXPass::FXS_SIZE);
+
+		apPassConstMacros.push_back(std::make_unique<TAMacroDef>());
+		*(apPassConstMacros.back().get())=aConstMacros;
+
+
 		for (nShaderNum=0;nShaderNum<SFXPass::FXS_SIZE && bRet;++nShaderNum)
 		if (PG.aEntryPoints[nShaderNum].first.length())
+		{
+			SFXPassGroup::TEntryPointVer &EP=PG.aEntryPoints[nShaderNum];
+
+			aapPassTasks.back()[nShaderNum]=std::make_unique<SD3DCompileTask>();
+
+			SD3DCompileTask &rCT=*(aapPassTasks.back()[nShaderNum].get());
+			rCT.paConstMacros=apPassConstMacros.back().get();
+			rCT.pPG=&PG;
+			rCT.sSource=sSource.c_str();
+			rCT.sShaderVer=GetShaderVer(nShaderNum,EP.second);
+			rCT.uFlags=uFlags;
+			rCT.uShaderVer=EP.second;
+			rCT.nPassNum=nPassNum;
+			rCT.nShaderNum=nShaderNum;
+
+			rCT.sSourceName=sSourceName_;
+			char p[32];
+			_itoa_s(nPassNum,p,10);
+			rCT.sSourceName+=std::string("_")+PG.sName+"["+std::string(p)+"]_"+GetShaderVer(nShaderNum,EP.second);
+
+			apTasks.push_back(&rCT);
+		}
+
+		/*
 		{
 			ID3DBlob *pCode=0,*pErr=0;
 			SFXPassGroup::TEntryPointVer &EP=PG.aEntryPoints[nShaderNum];
@@ -3177,7 +3243,7 @@ bool CExpCompiler::CompilePassGroup(const char *sSourceName_,SFXPassGroup &PG,un
 
 		if (bRet)
 			PG.apPass.emplace_back(std::move(pPass));
-
+		*/
 
 
 		nSwitchedParam=0;
@@ -3203,6 +3269,73 @@ bool CExpCompiler::CompilePassGroup(const char *sSourceName_,SFXPassGroup &PG,un
 		}
 		nPassNum++;
 	}while (nSwitchedParam<(int)aParams.size() && bRet);
+
+
+
+
+	std::vector<std::unique_ptr<std::thread>> apThreads;
+	apThreads.resize(7);
+
+	size_t uStep=apTasks.size()/(apThreads.size()+1),
+			uTaskOffs=0;
+	uStep=max(uStep,1);
+
+	for (size_t t=0;t<=apThreads.size();++t)
+	if (uTaskOffs<apTasks.size())
+	{
+		if (t<apThreads.size())
+		{
+			apThreads[t]=std::make_unique<std::thread>(CompileThread,this,&apTasks[uTaskOffs],uStep);
+			uTaskOffs+=uStep;
+		}
+		else
+			CompileThread(this,&apTasks[uTaskOffs],apTasks.size()-uTaskOffs);
+	}
+
+
+	for (std::unique_ptr<std::thread> &rPtr:	apThreads)
+	if (rPtr)
+		rPtr->join();
+
+
+	for (size_t p=0;p<aapPassTasks.size() && bRet;++p)
+	{
+		std::unique_ptr<SFXPass> pPass=std::make_unique<SFXPass>();
+
+		for (nShaderNum=0;nShaderNum<(int)aapPassTasks[p].size() && bRet;++nShaderNum)
+		{
+			SD3DCompileTask *pTask=aapPassTasks[p][nShaderNum].get();
+
+			if (pTask)
+			{
+				if (pTask->pCode)
+				{
+					pPass->aShaders[nShaderNum].resize(pTask->pCode->GetBufferSize());
+					memcpy(&pPass->aShaders[nShaderNum][0],pTask->pCode->GetBufferPointer(),pTask->pCode->GetBufferSize());
+				}
+				else
+					bRet=false;
+
+
+				if (pTask->pErr)
+				{
+					static const char *asShaders[SFXPass::FXS_SIZE]={"Vertex Shader","Pixel Shader","Geometry Shader","Hull Shader","Domain Shader","Compute shader"};
+					int nErrCnt=m_nErrorsCnt;
+
+					OutputD3DCompilerErrors(pTask->sSourceName.c_str(),pTask->pErr,&anLineID[0],(int)anLineID.size());
+		
+					if (nErrCnt!=m_nErrorsCnt)
+					{
+						ErrorLn(0,EERR_PASS,(PG.sName+": "+asShaders[nShaderNum]).c_str());
+						m_nBlockErrorRuleLn=-1;
+					}
+				}
+			}
+		}
+
+		if (bRet)
+			PG.apPass.emplace_back(std::move(pPass));
+	}
 
 	return bRet;
 }
