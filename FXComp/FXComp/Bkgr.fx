@@ -1,3 +1,5 @@
+void a();
+
 typedef int T;
 
 struct SS
@@ -186,6 +188,7 @@ struct PS_OUTPUT
 {
     float4 cOut : SV_Target0;  // Pixel color
 };
+
 
 
 PS_OUTPUT PixOutRestore(VS_OUT In)

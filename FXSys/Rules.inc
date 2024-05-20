@@ -68,6 +68,7 @@ DEF_ERULE(register_def)
 DEF_ERULE(semantic_def)
 
 DEF_ERULE(func_def)
+DEF_ERULE(func_decl)
 DEF_ERULE(func_name)
 DEF_ERULE(args)
 DEF_ERULE(arg)
