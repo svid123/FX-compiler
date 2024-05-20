@@ -1792,6 +1792,9 @@ void CExpCompiler::onSuccessRuleState(CPState *pState,SExpRuleState *aStatesStac
 								//ErrorLn(pFirstT->nLine,EERR_NESTED_FUNC);
 				break;
 
+		case ERULE_func_decl:if (pCurRS->nState==1)
+								m_CurrentFunc.sName.clear();
+			break;
 
 		case ERULE_func_def:
 			break;
@@ -2116,6 +2119,9 @@ bool CExpCompiler::onErrorRule(CPState *pTState,SExpRuleState *aStatesStack,int 
 						return false;
 			break;
 
+		case ERULE_func_decl:if (pCurRS->nState == 1)	//Not a declaration but possible definition
+								return false;
+			break;
 		//case ERULE_func_name:if (pCurRS->nState==1 || m_aScopes.size()>1)	//Not a error on #1 state, and inside any nested scopes {..}
 			//					return false;								//as local function definitions are not expected
 			//break;

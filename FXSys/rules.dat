@@ -40,9 +40,10 @@ template_expression=([ETN_ID, ETN_KW_SIGNED, ETN_KW_UNSIGNED, ETN_OP_PLUS-ETN_OP
 under_const_expr={kw_expression}
 
 
-var_func_definition={var_def} | {func_def}
+var_func_definition={var_def} | {func_decl} | {func_def}
 
 func_def={func_name} {block}
+func_decl={func_name} [ETN_SEMICOLON]
 func_name={var_qualified_type} [ETN_ID] [ETN_BRACEC_OPEN] {args}? [ETN_BRACEC_CLOSE] ([ETN_OP_ELSE] [ETN_ID])?
 
 init_expr={init_block} | {init_data}

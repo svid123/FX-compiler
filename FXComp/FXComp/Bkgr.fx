@@ -1,3 +1,5 @@
+void a();
+
 typedef int T;
 
 struct SS
@@ -155,6 +157,21 @@ void a()
 {
 }
 
+void VertOut(VS_IN In, out VS_OUT Out)
+{
+	Out.vPos.x=((In.vPos.x+1)*0.5f*g_vTransform.x+g_vTransform.z)*2-1;
+	Out.vPos.y=1-((1-In.vPos.y)*0.5f*g_vTransform.y+g_vTransform.w)*2;
+	Out.vPos.z=1;
+	Out.vPos.w=1.0;//cv4.z;
+	Out.vT0.x=In.vPos.x*0.5f+0.5f;
+	Out.vT0.y=0.5f-In.vPos.y*0.5f;
+	Out.vT0.xy=Out.vT0.xy*g_vTexTransform.zw+g_vTexTransform.xy;
+
+	Out.vColor=g_vColor;
+	if (g_vSettings.x>0.5f)
+		Out.vColor*=g_bufColor[0];
+}
+
 
 
 
@@ -171,6 +188,7 @@ struct PS_OUTPUT
 {
     float4 cOut : SV_Target0;  // Pixel color
 };
+
 
 
 PS_OUTPUT PixOutRestore(VS_OUT In)
@@ -207,7 +225,7 @@ PS_OUTPUT PixOut(VS_OUT In)
 
 	if (g_vSettings.y!=1.0f)
 		Out.cOut.rgb=pow(Out.cOut.rgb,g_vSettings.y);
-
+		
 	Out.cOut*=In.vColor;
 	Out.cOut+=g_tDiffTexture[1].Sample(PointSampler, In.vT0);
 
@@ -272,8 +290,8 @@ technique T0
 		DefRange(range,aa,3);
 
 
-		//SetVertexShader(50, VertOut);
-		SetPixelShader(50, PixOut);
+		SetVertexShader(60, VertOut);
+		SetPixelShader(60, PixOut);
     }
 /*
     pass P1	//Draw less, don't change Z
