@@ -1793,7 +1793,7 @@ void CExpCompiler::onSuccessRuleState(CPState *pState,SExpRuleState *aStatesStac
 				break;
 
 		case ERULE_func_decl:if (pCurRS->nState==1)
-								m_CurrentFunc.sName.clear();
+								m_CurrentFunc.Reset();
 			break;
 
 		case ERULE_func_def:
