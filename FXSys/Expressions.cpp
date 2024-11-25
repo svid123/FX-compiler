@@ -3066,7 +3066,7 @@ void CExpCompiler::SetPassShader(TToken *aTokens,int nAllT)
 
 const char *CExpCompiler::GetShaderVer(int nShaderName,int ver)
 {
-	static const char *sName[SFXPass::FXS_SIZE]={"vs_","ps_","gs_","hs_","ds_","cs_"};
+	static const char *sName[SFXPass::FXS_SIZE]={"vs_","ps_","gs_","hs_","ds_","cs_","ms_","as_"};
 	static char sRet[32];
 	char p[16];
 	int nVer=ver/10,
@@ -3325,7 +3325,8 @@ bool CExpCompiler::CompilePassGroup(const char *sSourceName_,SFXPassGroup &PG,un
 
 				if (pTask->pErr)
 				{
-					static const char *asShaders[SFXPass::FXS_SIZE]={"Vertex Shader","Pixel Shader","Geometry Shader","Hull Shader","Domain Shader","Compute shader"};
+					static const char *asShaders[SFXPass::FXS_SIZE]={"Vertex Shader","Pixel Shader","Geometry Shader","Hull Shader","Domain Shader","Compute shader",
+																	"Mesh Shader","Amplification Shader"};
 					int nErrCnt=m_nErrorsCnt;
 
 					OutputD3DCompilerErrors(pTask->sSourceName.c_str(),pTask->pErr,&anLineID[0],(int)anLineID.size());

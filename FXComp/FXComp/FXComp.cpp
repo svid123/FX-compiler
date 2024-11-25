@@ -139,7 +139,8 @@ void ProcessArg(const char *sArg)
 
 void Disassemble(SFXCode &src,std::string &dest)
 {
-	static const char *asShaderName[SFXPass::FXS_SIZE]={"VertexShader","PixelShader","GeometryShader","HullShader","DomainShader","ComputeShader"};
+	static const char *asShaderName[SFXPass::FXS_SIZE]={"VertexShader","PixelShader","GeometryShader","HullShader","DomainShader","ComputeShader",
+														"MeshShader","AmplificationShader"};
 	std::vector<std::tuple<std::string,int,int,int>> aParamRanges;
 	char p[32];
 	dest="";

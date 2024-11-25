@@ -65,6 +65,8 @@
 [ETN_KW_SETHS, SetHullShader]=SetHullShader
 [ETN_KW_SETDS, SetDomainShader]=SetDomainShader
 [ETN_KW_SETCS, SetComputeShader]=SetComputeShader
+[ETN_KW_SETMS, SetMeshShader]=SetMeshShader
+[ETN_KW_SETAS, SetAmplificationShader]=SetAmplificationShader
 [ETN_KW_DEFRANGE, DefRange]=DefRange
 [ETN_KW_CBUFFER, cbuffer]=cbuffer
 
@@ -90,11 +92,16 @@
 [ETN_KW_ROWMAJOR, row_major]=row_major
 [ETN_KW_COLMAJOR, column_major]=column_major
 
+;*** type modifiers ***
 [ETN_KW_SIGNED, signed]=signed
 [ETN_KW_UNSIGNED, unsigned]=unsigned
 [ETN_KW_TRIANGLE, triangle]=triangle
 [ETN_KW_LINE, line]=line
 [ETN_KW_POINT, point]=point
+[ETN_KW_PAYLOAD, payload]=payload
+[ETN_KW_VERTICES, vertices]=vertices
+[ETN_KW_INDICES, indices]=indices
+;^^^ type modifiers ^^^
 [ETN_KW_TYPEDEF, typedef]=typedef
 [ETN_KW_REGISTER, register]=register
 

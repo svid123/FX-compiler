@@ -272,9 +272,29 @@ DepthStencilState DSS_ZWriteLess
 	DepthFunc=Less;
 };
 
+struct MyOutputVertex
+{
+    float4 ndcPos : SV_Position;
+    float4 someAttr : ATTRIBUTE;
+};
+
+[outputtopology("triangle")]
+[numthreads(4,4,4)]
+void MeshShader(
+    in uint tid: SV_DispatchThreadID,
+    in uint tig: SV_GroupIndex,
+    out vertices MyOutputVertex verts[3],
+    out indices uint3 triangles[3])
+{
+}
 
 technique T0
 {
+    pass PM
+    {
+		SetMeshShader(65,MeshShader);
+    }
+/*
     pass P0
     {
 		SetBlendState(BS_AlphaBlend,-1,0xFFFFFFFF);
@@ -293,6 +313,7 @@ technique T0
 		SetVertexShader(60, VertOut);
 		SetPixelShader(60, PixOut);
     }
+*/
 /*
     pass P1	//Draw less, don't change Z
     {
