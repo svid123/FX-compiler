@@ -47,6 +47,8 @@ struct SFXPass:	public SSerializable
 		FXS_HS,
 		FXS_DS,
 		FXS_CS,
+		FXS_MS,
+		FXS_AS,
 
 		FXS_SIZE
 	};

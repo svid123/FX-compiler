@@ -73,7 +73,7 @@ arg_expr_block=[ETN_BRACEC_OPEN] ({arg_expr_block} | {arg_expr_chars})* [ETN_BRA
 arg_expr_chars=[ETN_ID, ETN_KW_SIGNED, ETN_KW_UNSIGNED, ETN_OP_PLUS-ETN_CONST_DOUBLE_E, ETN_COMMA]
 arg_expr_chars_no_comma=[ETN_ID, ETN_KW_SIGNED, ETN_KW_UNSIGNED, ETN_OP_PLUS-ETN_CONST_DOUBLE_E]
 
-arg_type=[ETN_KW_SIGNED,ETN_KW_UNSIGNED,ETN_KW_TRIANGLE-ETN_KW_POINT]? ([ETN_ID, ETN_KW_VOID, ETN_KW_SAMPLER, ETN_KW_SAMPLERSTATE, ETN_KW_SAMPLERCMPSTATE]) ([ETN_OP_LESS] {template_expression} [ETN_OP_GATE])?
+arg_type=[ETN_KW_SIGNED,ETN_KW_UNSIGNED,ETN_KW_TRIANGLE-ETN_KW_INDICES]? ([ETN_ID, ETN_KW_VOID, ETN_KW_SAMPLER, ETN_KW_SAMPLERSTATE, ETN_KW_SAMPLERCMPSTATE]) ([ETN_OP_LESS] {template_expression} [ETN_OP_GATE])?
 arg=[ETN_KW_OUT-ETN_KW_UNIFORM,ETN_KW_CONST]? {arg_type} [ETN_ID] {array_dim}* (([ETN_OP_ASSIGN] {arg_expression}) | ([ETN_OP_ELSE][ETN_ID]))?
 var_arg=[ETN_VAARG]
 args={arg} ([ETN_COMMA]{arg})* ([ETN_COMMA]{var_arg})?
@@ -148,7 +148,7 @@ kw_depthstencilstate=[ETN_KW_DEPTHSTENCILSTATE] [ETN_ID] [ETN_BLOCK_OPEN] {dss_d
 set_rs=[ETN_KW_SETRS] [ETN_BRACEC_OPEN] [ETN_ID] [ETN_BRACEC_CLOSE]
 set_bs=[ETN_KW_SETBS] [ETN_BRACEC_OPEN] [ETN_ID] [ETN_COMMA] {const_expression} [ETN_COMMA] {const_expression} [ETN_BRACEC_CLOSE]
 set_dss=[ETN_KW_SETDSS] [ETN_BRACEC_OPEN] [ETN_ID] [ETN_COMMA] {const_expression} [ETN_BRACEC_CLOSE]
-set_shader=([ETN_KW_SETPS] | [ETN_KW_SETVS] | [ETN_KW_SETGS] | [ETN_KW_SETHS] | [ETN_KW_SETDS] | [ETN_KW_SETCS]) [ETN_BRACEC_OPEN] {const_expression} [ETN_COMMA] [ETN_ID] [ETN_BRACEC_CLOSE]
+set_shader=([ETN_KW_SETPS] | [ETN_KW_SETVS] | [ETN_KW_SETGS] | [ETN_KW_SETHS] | [ETN_KW_SETDS] | [ETN_KW_SETCS] | [ETN_KW_SETMS] | [ETN_KW_SETAS]) [ETN_BRACEC_OPEN] {const_expression} [ETN_COMMA] [ETN_ID] [ETN_BRACEC_CLOSE]
 kw_defrange=[ETN_KW_DEFRANGE] [ETN_BRACEC_OPEN] [ETN_ID] [ETN_COMMA] {const_expression} [ETN_COMMA] {const_expression} [ETN_BRACEC_CLOSE]
 kw_defconst=[ETN_ID] [ETN_OP_ASSIGN] ([ETN_CONST_STRING] | {const_expression})
 pass_definition=({set_rs} | {set_bs} | {set_dss} | {set_shader} | {kw_defrange} | {kw_defconst}) [ETN_SEMICOLON]
