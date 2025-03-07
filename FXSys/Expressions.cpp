@@ -1734,6 +1734,7 @@ void CExpCompiler::onSuccessRuleState(CPState *pState,SExpRuleState *aStatesStac
 								BeginRS(m_TStream.getTokens()[nStartTokenNum-1].sText);
 							break;
 
+
 		case ERULE_kw_sampler:if (pCurRS->nState==1)
 								BeginSamplers(pFirstT,nAllT);
 							break;
@@ -2499,6 +2500,10 @@ bool CExpCompiler::ReadConstVector(TToken *aTokens,int nAllT,SConstVector &rDest
 
 void CExpCompiler::BeginSamplers(TToken *aTokens,int nAllT)
 {
+	if (m_nCurrentVarAttr)
+		m_pOutStream->mVarsAttrs[aTokens[0].sText]=m_nCurrentVarAttr;
+	m_nCurrentVarAttr=0;
+
 	m_sNewSampler=aTokens[0].sText;
 	m_aNewSamplers.clear();
 	m_anSamplersSizes.clear();
@@ -3710,7 +3715,7 @@ void CExpCompiler::ProcessExpression(TToken *aT,int nAllT)
 
 bool CExpCompiler::CustomAttr(TToken *aT,int nAllT)
 {
-	static const char *asAttrs[]={"root_param","root_const"};
+	static const char *asAttrs[]={"root_param","root_const","upscaler"};
 	bool bRet=false;
 
 	static_assert(_countof(asAttrs)==SFXCode::VAB_SIZE,"_countof(asAttrs)==SFXCode::VAB_SIZE");

@@ -69,6 +69,7 @@ enum DEFERRED_MATERIAL_DATA	//Stored in alpha channel
 	DMD_REGULAR_COCKPIT=(DMD_MAT_MODEL | DMD_FLAG_SHADOWS | DMD_FLAG_COCKPITREF | DMD_FLAG_CUBEIBL),
 };
 
+[upscaler]
 sampler LerpSampler
 {
 	Filter=MIN_MAG_MIP_LINEAR;
