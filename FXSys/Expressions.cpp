@@ -1623,7 +1623,7 @@ void CExpCompiler::onSuccessRuleState(CPState *pState,SExpRuleState *aStatesStac
 		case ERULE_kw_cbuffer:if (pCurRS->nState==1 && m_nCurrentVarAttr)
 							{
 								if (m_nCurrentVarAttr)
-									m_pOutStream->mVarsAttrs[pFirstT->sText]=m_nCurrentVarAttr;
+									m_pOutStream->mVarsAttrs[pFirstT->sText]|=m_nCurrentVarAttr;
 								
 								//EndIDDef();
 							}
@@ -2293,7 +2293,7 @@ void CExpCompiler::BeginIDDef(TToken *pToken)
 
 
 	if (m_nCurrentVarAttr)
-		m_pOutStream->mVarsAttrs[pToken->sText]=m_nCurrentVarAttr;
+		m_pOutStream->mVarsAttrs[pToken->sText]|=m_nCurrentVarAttr;
 }
 
 void CExpCompiler::DefineNewTypeID(TToken *aTokens,int nAllT)
@@ -2501,7 +2501,7 @@ bool CExpCompiler::ReadConstVector(TToken *aTokens,int nAllT,SConstVector &rDest
 void CExpCompiler::BeginSamplers(TToken *aTokens,int nAllT)
 {
 	if (m_nCurrentVarAttr)
-		m_pOutStream->mVarsAttrs[aTokens[0].sText]=m_nCurrentVarAttr;
+		m_pOutStream->mVarsAttrs[aTokens[0].sText]|=m_nCurrentVarAttr;
 	m_nCurrentVarAttr=0;
 
 	m_sNewSampler=aTokens[0].sText;
