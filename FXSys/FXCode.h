@@ -137,6 +137,7 @@ public:
 	{
 		VAB_ROOTPARAM=0,
 		VAB_ROOTCONST,
+		VAB_UPSCALE,
 
 		VAB_SIZE
 	};
