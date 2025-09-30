@@ -3715,7 +3715,7 @@ void CExpCompiler::ProcessExpression(TToken *aT,int nAllT)
 
 bool CExpCompiler::CustomAttr(TToken *aT,int nAllT)
 {
-	static const char *asAttrs[]={"root_param","root_const","upscaler"};
+	static const char *asAttrs[]={"root_param","root_const","upscaler","bindless_srv"};
 	bool bRet=false;
 
 	static_assert(_countof(asAttrs)==SFXCode::VAB_SIZE,"_countof(asAttrs)==SFXCode::VAB_SIZE");
