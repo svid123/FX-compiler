@@ -51,7 +51,8 @@ using namespace fx;
 
 std::string g_sDir;
 std::string g_sIncludeDir;
-std::vector<std::tuple<std::string,std::string,bool>> g_asFiles;
+typedef std::string TOutName,TInName,TRSName;
+std::vector<std::tuple<TInName,TOutName,bool,TRSName>> g_asFiles;
 std::vector<std::string> g_asDefinitions;
 
 unsigned int g_uFlags=0;
@@ -84,7 +85,9 @@ static const char *g_asOpt[][2]={{"/?","\t\tprint this message\n\n"},
 							{"/Fc","<file>\toutput assembly code listing file\n"},
 							{"/l","<file>\toutput log file\n"},
 							{"/t","\t\toutput source text\n"},
-							{"/D","<name>[=<value>]\tset definition"}};
+							{"/D","<name>[=<value>]\tset definition"},
+							
+							{"/Frs","<file> include RootSignature from .rs file"}};
 
 void PrintHelp()
 {
@@ -170,6 +173,10 @@ void ProcessArg(const char *sArg)
 			break;
 
 		case 23:g_asDefinitions.emplace_back(s);				
+			break;
+
+		case 24:if (g_asFiles.size())
+					std::get<3>(g_asFiles.back())=s;
 			break;
 	}
 }
@@ -341,21 +348,21 @@ int main(int argc, char* argv[])
 		if (arg[0]=='/')
 			ProcessArg(arg);
 		else
-			g_asFiles.push_back(std::make_tuple(arg,"",false));
+			g_asFiles.push_back(std::make_tuple(arg,"",false,""));
 	}
 
 	std::string sOutput;
-	std::string sSrc,sOut;
+	std::string sSrc,sOut,sRSName;
 	bool bBIN;
 	
 	for (size_t n=0;n<g_asFiles.size();++n)
 	{
-		std::tie(sSrc,sOut,bBIN)=g_asFiles[n];
+		std::tie(sSrc,sOut,bBIN,sRSName)=g_asFiles[n];
 		
 		printf("Compiling: %s..\n\n",sSrc.c_str());
 		sOutput="";
 		bool bRes=FXCompile(sSrc.c_str(),g_sIncludeDir.c_str(),g_uFlags,g_asDefinitions.size()?&g_asDefinitions[0]:0,int(g_asDefinitions.size()),
-							Code,sOutput,0,g_sLogFileName.c_str());
+							Code,sOutput,0,g_sLogFileName.c_str(),sRSName.c_str());
 
 		if (sOutput.length())
 			printf("%s\n==========\n",sOutput.c_str());

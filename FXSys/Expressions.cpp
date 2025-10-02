@@ -973,7 +973,7 @@ int CExpCompiler::CheckErrors(std::string *psRet)
 
 
 
-bool CExpCompiler::Compile(const char *sFileName,const char *_sDir,SFXCode &rDest,std::string *asDefs,int nAllDefs,
+bool CExpCompiler::Compile(const char *sFileName,const char *sRSName,const char *_sDir,SFXCode &rDest,std::string *asDefs,int nAllDefs,
 						unsigned int uFlags)
 {
 	std::string sDir(_sDir?_sDir:"");
@@ -1103,6 +1103,7 @@ bool CExpCompiler::Compile(const char *sFileName,const char *_sDir,SFXCode &rDes
 			if ((int)sName.rfind('.')!=-1)
 				sName.resize(sName.rfind('.'));
 
+			CollectRS(sRSName,sDir.c_str());
 
 		//Fill-in default macros
 			for (auto &pair:	m_pOutStream->mTech)
@@ -1129,12 +1130,18 @@ bool CExpCompiler::Compile(const char *sFileName,const char *_sDir,SFXCode &rDes
 				mDefaultMacros[pair.first]="int";
 			
 			for (auto &pair:	m_pOutStream->mTech)
-			{	
+			{
+				std::vector<std::string> &raRS=m_mTechPassRootSignature[pair.first];
+				const std::string *asRS=0;
+
+				if (raRS.size())
+					asRS=raRS.data();
+
 				for (SFXPassGroup &PG:	pair.second.aPassG)
 				{
 					int nErrCnt=m_nErrorsCnt;
 					
-					bRes=CompilePassGroup(sName.c_str(),PG,uFlags,mDefaultMacros);
+					bRes=CompilePassGroup(sName.c_str(),PG,uFlags,mDefaultMacros,asRS);
 
 					if (nErrCnt!=m_nErrorsCnt)
 					{
@@ -3103,7 +3110,8 @@ void CExpCompiler::CompileThread(CExpCompiler *pOwner,SD3DCompileTask **apTask,s
 		_ASSERTE(!pTask->pCode);
 
 		if (!pOwner->D3DCompile(pTask->sSource,strlen(pTask->sSource),
-				pTask->sSourceName.c_str(),pTask->paConstMacros->size()?&(*pTask->paConstMacros)[0]:0,EP.first.c_str(),pTask->sShaderVer.c_str(),EP.second,pTask->uFlags,&pTask->pCode,&pTask->pErr))
+				pTask->sSourceName.c_str(),pTask->paConstMacros->size()?&(*pTask->paConstMacros)[0]:0,EP.first.c_str(),pTask->sShaderVer.c_str(),EP.second,pTask->uFlags,&pTask->pCode,&pTask->pErr,
+				pTask->sRootSignatureText))
 		{
 			if (pTask->pCode)			
 			{
@@ -3114,7 +3122,8 @@ void CExpCompiler::CompileThread(CExpCompiler *pOwner,SD3DCompileTask **apTask,s
 	}
 }
 
-bool CExpCompiler::CompilePassGroup(const char *sSourceName_,SFXPassGroup &PG,unsigned int uFlags,const std::map<std::string,std::string> &mDefMacros)
+bool CExpCompiler::CompilePassGroup(const char *sSourceName_,SFXPassGroup &PG,unsigned int uFlags,const std::map<std::string,std::string> &mDefMacros,
+									const std::string *&rpsRootSignature)
 {
 	bool bRet=true;
 	typedef std::vector<TMacroDefinition> TAMacroDef;
@@ -3208,6 +3217,7 @@ bool CExpCompiler::CompilePassGroup(const char *sSourceName_,SFXPassGroup &PG,un
 			rCT.uShaderVer=EP.second;
 			rCT.nPassNum=nPassNum;
 			rCT.nShaderNum=nShaderNum;
+			rCT.sRootSignatureText=rpsRootSignature?rpsRootSignature->c_str():0;
 
 			rCT.sSourceName=sSourceName_;
 			char p[32];
@@ -3282,6 +3292,8 @@ bool CExpCompiler::CompilePassGroup(const char *sSourceName_,SFXPassGroup &PG,un
 			std::get<3>(aParams[p0].second)=p;
 		}
 		nPassNum++;
+		if (rpsRootSignature)
+			rpsRootSignature++;
 	}while (nSwitchedParam<(int)aParams.size() && bRet);
 
 
@@ -3356,7 +3368,7 @@ bool CExpCompiler::CompilePassGroup(const char *sSourceName_,SFXPassGroup &PG,un
 }
 
 bool CExpCompiler::D3DCompile(const char *sSource,size_t sz,const char *sFileName,TMacroDefinition *apMacros,const char *sEntryPoint,
-				const char *sShaderName,int nShaderVer,unsigned int uFlags,void *ppCode,void *ppErrorMsgs)
+				const char *sShaderName,int nShaderVer,unsigned int uFlags,void *ppCode,void *ppErrorMsgs,const char *sRootSignatureText)
 {
 #ifndef _GAMING_XBOX
 
@@ -3386,7 +3398,7 @@ bool CExpCompiler::D3DCompile(const char *sSource,size_t sz,const char *sFileNam
 		IDxcUtils *pUtils=0;
 		std::vector<const wchar_t *> asArgs;
 		std::vector<std::unique_ptr<std::wstring>> apsDefines;
-		std::wstring wsEntryPoint,wsTarget,wsFileName;
+		std::wstring wsEntryPoint,wsTarget,wsFileName,wsRS;
 		size_t szRet;
 
 		wsFileName.resize(strlen(sFileName));
@@ -3399,7 +3411,7 @@ bool CExpCompiler::D3DCompile(const char *sSource,size_t sz,const char *sFileNam
 		DxcCreateInstance(CLSID_DxcCompiler,IID_PPV_ARGS(&pCompiler));
 
 		wsEntryPoint.resize(strlen(sEntryPoint));
-		mbstowcs_s(&szRet,(wchar_t *)wsEntryPoint.c_str(),wsEntryPoint.length()+1,sEntryPoint,wsEntryPoint.length());		
+		mbstowcs_s(&szRet,(wchar_t *)wsEntryPoint.c_str(),wsEntryPoint.length()+1,sEntryPoint,wsEntryPoint.length());
 		asArgs.push_back(L"-E");
 		asArgs.push_back(wsEntryPoint.c_str());
 
@@ -3418,9 +3430,26 @@ bool CExpCompiler::D3DCompile(const char *sSource,size_t sz,const char *sFileNam
 		}
 		else
 			asArgs.push_back(L"-Qstrip_debug");
+
+		if (sRootSignatureText)
+		{			
+			wsRS.resize(strlen(sRootSignatureText));
+
+			asArgs.push_back(L"-D");
+			mbstowcs_s(&szRet,(wchar_t *)wsRS.c_str(),wsRS.length()+1,sRootSignatureText,wsRS.length());
+			
+			wsRS=L"__RootSignature__="+wsRS;
+			asArgs.push_back(wsRS.c_str());
+
+			asArgs.push_back(L"-rootsig-define");
+			asArgs.push_back(L"__RootSignature__");
+		}
 #ifdef _GAMING_XBOX
-		asArgs.push_back(L"-D");
-		asArgs.push_back(L"__XBOX_DISABLE_PRECOMPILE");
+		else
+		{
+			asArgs.push_back(L"-D");
+			asArgs.push_back(L"__XBOX_DISABLE_PRECOMPILE");
+		}
 #endif
 		
 		
@@ -3929,6 +3958,56 @@ PBaseType CExpCompiler::FindType(const char *sName)
 	}
 
 	return PBaseType();
+}
+
+void CExpCompiler::CollectRS(const char *sRSName,const char *sDir)
+{
+	m_mTechPassRootSignature.clear();
+
+	if (sRSName && sRSName[0])
+	{
+		std::string sCompleteFN=SCodeDependence::MakePathFileName(sDir,sRSName);
+
+		FILE *f=0;
+		fopen_s(&f,sCompleteFN.c_str(),"r");
+
+		if (f)	
+		{
+			size_t uDepHash=0,uFXHash;
+			std::vector<unsigned int> auDepDHMS;
+			for (auto &rDep:	m_pOutStream->Header.aDependences)
+				auDepDHMS.push_back(rDep.uChangeDHMS);
+
+			uFXHash=std::_Hash_array_representation(auDepDHMS.data(),auDepDHMS.size());
+
+			fscanf_s(f,"DepHash=0x%llx\n",&uDepHash);
+
+			if (uDepHash==uFXHash)
+			{
+				char p[8192]="";
+				unsigned int uTechNum=0;
+				fscanf_s(f,"TechNum=%i\n",&uTechNum);
+
+				while (uTechNum-- && !feof(f))
+				{
+					unsigned int uPassCount=0;
+					fscanf_s(f,"technique=%s , %i\n",p,sizeof(p),&uPassCount);
+					
+					auto &raStr=m_mTechPassRootSignature[p];
+					while (uPassCount--)
+					{
+						fgets(p,sizeof(p),f);
+						size_t len=strlen(p);
+						if (len)
+							p[len-1]=0;	//remove '\n' symbol
+						raStr.push_back(p);
+					}
+				}
+			}
+
+			fclose(f);
+		}
+	}
 }
 
 #include "ConstFunc.inc"

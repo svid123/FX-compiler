@@ -14,5 +14,5 @@ namespace fx
 
 extern bool FXCompile(const char *sFXFile,const char *sAdditionalDir,unsigned int uFlags,std::string *asDefs,int nAllDefs,
 						SFXCode &dest,std::string &rsErrors,
-						CFileHandler *pFH=0,const char *sLogFileName=0);
+						CFileHandler *pFH=0,const char *sLogFileName=0,const char *sRSFileName=0);
 }
