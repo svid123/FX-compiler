@@ -1,7 +1,9 @@
 #include "stdafx.h"
 
+#ifndef _GAMING_XBOX
 #include <d3dcompiler.h>
 #include "dxc/dxcapi.h"
+#endif
 
 #include "resource.h"
 
@@ -20,6 +22,7 @@
 #include <windows.h>
 #include <algorithm>
 #include <thread>
+#include <mutex>
 
 using namespace fx;
 
@@ -3355,10 +3358,13 @@ bool CExpCompiler::CompilePassGroup(const char *sSourceName_,SFXPassGroup &PG,un
 bool CExpCompiler::D3DCompile(const char *sSource,size_t sz,const char *sFileName,TMacroDefinition *apMacros,const char *sEntryPoint,
 				const char *sShaderName,int nShaderVer,unsigned int uFlags,void *ppCode,void *ppErrorMsgs)
 {
+#ifndef _GAMING_XBOX
+
 	if (nShaderVer<=51)
 		return D3DCompile2(sSource,sz,
 				sFileName,(D3D_SHADER_MACRO *)apMacros,0,sEntryPoint,sShaderName,uFlags,0,0,0,0,(ID3DBlob **)ppCode,(ID3DBlob **)ppErrorMsgs)==S_OK;
 	else
+#endif
 	{
 		const std::pair<int,const wchar_t *> aFlags[]={
 														{D3DCOMPILE_SKIP_OPTIMIZATION,	DXC_ARG_SKIP_OPTIMIZATIONS},
@@ -3388,7 +3394,7 @@ bool CExpCompiler::D3DCompile(const char *sSource,size_t sz,const char *sFileNam
 
 		DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&pUtils));
 		IDxcBlobEncoding *pSource=0;
-		pUtils->CreateBlob(sSource,(unsigned int)sz, CP_UTF8, &pSource);
+		pUtils->CreateBlob(sSource,(unsigned int)sz,CP_UTF8,&pSource);
 		IDxcCompiler3 *pCompiler=0;
 		DxcCreateInstance(CLSID_DxcCompiler,IID_PPV_ARGS(&pCompiler));
 
@@ -3412,8 +3418,11 @@ bool CExpCompiler::D3DCompile(const char *sSource,size_t sz,const char *sFileNam
 		}
 		else
 			asArgs.push_back(L"-Qstrip_debug");
-		//asArgs.push_back(L"-Qstrip_reflect");
-
+#ifdef _GAMING_XBOX
+		asArgs.push_back(L"-D");
+		asArgs.push_back(L"__XBOX_DISABLE_PRECOMPILE");
+#endif
+		
 		
 		for (auto &pair:	aFlags)
 		if (uFlags & pair.first)
@@ -3502,11 +3511,11 @@ bool CExpCompiler::D3DCompile(const char *sSource,size_t sz,const char *sFileNam
 				pos=pos1+1;
 			}
 			
-			ID3D10Blob *pErrs=0;
-			D3DCreateBlob(s.length()+1,&pErrs);
-			memcpy(pErrs->GetBufferPointer(),s.c_str(),s.length()+1);
+			IDxcBlobEncoding *pErrs=0;
+			HRESULT hr=pUtils->CreateBlob(s.c_str(),(int)s.length()+1,DXC_CP_ACP,&pErrs);
+			_ASSERTE(!FAILED(hr));
 
-			*((ID3DBlob **)ppErrorMsgs)=pErrs;
+			*((ID3DBlob **)ppErrorMsgs)=(ID3DBlob *)pErrs;
 			pErrors->Release();
 		}
 
@@ -3517,12 +3526,12 @@ bool CExpCompiler::D3DCompile(const char *sSource,size_t sz,const char *sFileNam
 
 			if (pCode && pCode->GetBufferSize())
 			{
-				ID3D10Blob *pC=0;
-				size_t sz=pCode->GetBufferSize();
-				D3DCreateBlob(pCode->GetBufferSize(),&pC);
-				memcpy(pC->GetBufferPointer(),pCode->GetBufferPointer(),pCode->GetBufferSize());
+				//D3DCreateBlob(pCode->GetBufferSize(),&pC);
+				IDxcBlobEncoding *pC=0;
+				HRESULT hr=pUtils->CreateBlob(pCode->GetBufferPointer(),(int)pCode->GetBufferSize(),DXC_CP_ACP,&pC);
+				_ASSERTE(!FAILED(hr));
 
-				*((ID3DBlob **)ppCode)=pC;
+				*((ID3DBlob **)ppCode)=(ID3DBlob*)pC;
 				pCode->Release();
 			}
 			else

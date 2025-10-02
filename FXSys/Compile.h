@@ -1,8 +1,11 @@
 #pragma once
 
 #include <string>
+#ifndef _GAMING_XBOX
 #include <d3dcompiler.h>
-
+#else
+//#include <dxcapi_xs.h>
+#endif
 #include "FXCode.h"
 #include "FileHandler.h"
 
