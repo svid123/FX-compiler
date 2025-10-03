@@ -3495,6 +3495,9 @@ bool CExpCompiler::D3DCompile(const char *sSource,size_t sz,const char *sFileNam
 			size_t pos=0,pos1,pos0;
 			int nSkip=0;
 
+			if (sErrs.find("error:")!=-1)
+				bRet=false;
+
 			while (pos<sErrs.size())
 			{
 				for (pos1=pos;pos1<sErrs.size() && sErrs[pos1]!='\n';++pos1);
@@ -4004,9 +4007,13 @@ void CExpCompiler::CollectRS(const char *sRSName,const char *sDir)
 					}
 				}
 			}
+			else
+				ErrorLn(0,EERR_RS_OUTDATED,sCompleteFN.c_str());
 
 			fclose(f);
 		}
+		else
+			ErrorLn(0,EERR_NO_RS,sCompleteFN.c_str());
 	}
 }
 

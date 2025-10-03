@@ -85,9 +85,9 @@ static const char *g_asOpt[][2]={{"/?","\t\tprint this message\n\n"},
 							{"/Fc","<file>\toutput assembly code listing file\n"},
 							{"/l","<file>\toutput log file\n"},
 							{"/t","\t\toutput source text\n"},
-							{"/D","<name>[=<value>]\tset definition"},
+							{"/D","<name>[=<value>]\tset definition\n"},
 							
-							{"/Frs","<file> include RootSignature from .rs file"}};
+							{"/Frs","<file>\tinclude RootSignature from .rs file\n"}};
 
 void PrintHelp()
 {
@@ -316,6 +316,15 @@ void Disassemble(SFXCode &src,std::string &dest)
 	}
 }
 
+void ShowVersion()
+{
+	printf("\tFX Compiler build date: %s\n",__DATE__);
+#ifdef _GAMING_XBOX
+	printf("XS build version\n");
+#endif
+	printf("Type /? for help\n");
+}
+
 int main(int argc, char* argv[])
 {
 	SFXCode Code;
@@ -354,6 +363,9 @@ int main(int argc, char* argv[])
 	std::string sOutput;
 	std::string sSrc,sOut,sRSName;
 	bool bBIN;
+
+	if (argc<=1)
+		ShowVersion();
 	
 	for (size_t n=0;n<g_asFiles.size();++n)
 	{
