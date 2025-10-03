@@ -337,7 +337,7 @@ private:
 	{
 		std::vector<TMacroDefinition> *paConstMacros;
 		SFXPassGroup *pPG;
-		const char *sSource;
+		const char *sSource,*sRootSignatureText;
 		unsigned int uFlags,uShaderVer;
 		int nPassNum,nShaderNum;
 		std::string sShaderVer,sSourceName;
@@ -345,7 +345,7 @@ private:
 		ID3DBlob *pCode,*pErr;
 
 		SD3DCompileTask():sSource(0),pPG(0),nPassNum(0),nShaderNum(0),paConstMacros(0),
-					pCode(0),pErr(0),uFlags(0),uShaderVer(0)
+					pCode(0),pErr(0),uFlags(0),uShaderVer(0),sRootSignatureText(0)
 		{
 		}
 
@@ -364,7 +364,7 @@ private:
 	std::set<unsigned long> m_sWasErrors;
 	std::vector<std::string> m_asErrors;
 	std::vector<std::pair<TToken *,TToken *>> m_aIgnoreWriteTokens;
-
+	std::map<std::string,std::vector<std::string>> m_mTechPassRootSignature;
 
 //	std::string m_sNewEnum;
 	unsigned long m_uCurrentFileHash;
@@ -458,9 +458,10 @@ private:
 	bool GetCommonMathType(const SComValue &a,const SComValue &b,CV_TYPE &ret);
 
 	bool D3DCompile(const char *sSource,size_t sz,const char *sFileName,TMacroDefinition *apMacros,const char *sEntryPoint,
-					const char *sShaderName,int nShaderVer,unsigned int uFlags,void *ppCode,void *ppErrorMsgs);
+					const char *sShaderName,int nShaderVer,unsigned int uFlags,void *ppCode,void *ppErrorMsgs,const char *sRootSignatureText);
 			
-	bool CompilePassGroup(const char *sSourceName,SFXPassGroup &PG,unsigned int uFlags,const std::map<std::string,std::string> &mDefMacros);
+	bool CompilePassGroup(const char *sSourceName,SFXPassGroup &PG,unsigned int uFlags,const std::map<std::string,std::string> &mDefMacros,
+						const std::string *&rpsRootSignature);
 	const char *GetShaderVer(int nShaderName,int ver);
 
 	void InsertKeptDirectives();
@@ -471,6 +472,8 @@ private:
 
 	void CreatePrimitiveTypes();
 	PBaseType FindType(const char *sName);
+
+	void CollectRS(const char *sRSName,const char *sDir);
 protected:
 
 	void OutputD3DCompilerErrors(const char *sSourceName,ID3D10Blob *pErrs,SFXCode::TSourceIDLine *anLineIDs,int nAllLines);
@@ -479,7 +482,7 @@ public:
 	CExpCompiler(const char *sLogFileName=0);
 	virtual ~CExpCompiler();
 
-	bool Compile(const char *sFileName,const char *sDir,SFXCode &rDest,std::string *asDefs,int nAllDefs,unsigned int uFlags);
+	bool Compile(const char *sFileName,const char *sRSName,const char *sDir,SFXCode &rDest,std::string *asDefs,int nAllDefs,unsigned int uFlags);
 
 	void ErrorLink(SFXCode &rECode,TExpLine nLine,int err,const char *sParam0="",const char *sParam1="");
 	void ErrorLn(int nLine,int err,const char *sParam0="",const char *sParam1="");

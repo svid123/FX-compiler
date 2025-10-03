@@ -1,5 +1,7 @@
 DEF_ERR(INVALID_RECORD_VALUE,	"invalid value of record '%t'")
 DEF_ERR(CHAR_EXPECTED_FOUND_TOKEN,	"'%c' is expected, found '%t'")
+DEF_ERR(NO_RS,	"\tRootSignature file '%s' not found")
+DEF_ERR(RS_OUTDATED,	"\tRootSignature '%s' does not match sources")
 DEF_ERR(PASS,	"\tpass '%s'")
 DEF_ERR(TECH,	"\t\ttechnique '%s'\n")
 DEF_ERR(TOO_MANY_CONSTRANGES,	"too many const ranges of pass '%s'")

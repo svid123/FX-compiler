@@ -7,7 +7,7 @@
 using namespace fx;
 
 bool fx::FXCompile(const char *sFXFile,const char *sAdditionalDir,unsigned int uFlags,std::string *asDefs,int nAllDefs,
-				SFXCode &dest,std::string &rsErrors,CFileHandler *pFH,const char *sLogFileName)
+				SFXCode &dest,std::string &rsErrors,CFileHandler *pFH,const char *sLogFileName,const char *sRSFileName)
 {
 	//CExpCompiler::setHINSTANCE((size_t)GetModuleHandle(0));
 	CExpCompiler comp(sLogFileName);
@@ -17,7 +17,7 @@ bool fx::FXCompile(const char *sFXFile,const char *sAdditionalDir,unsigned int u
 	comp.GetPreprocessor()->SetAdditionalDir(sAdditionalDir);
 	comp.ClearLog();
 
-	comp.Compile(sFXFile,"",dest,asDefs,nAllDefs,uFlags);
+	comp.Compile(sFXFile,sRSFileName,"",dest,asDefs,nAllDefs,uFlags);
 	comp.CheckErrors(&rsErrors);
 
 	return dest.bCompiled;
