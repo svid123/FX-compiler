@@ -325,12 +325,20 @@ void ShowVersion()
 	printf("Type /? for help\n");
 }
 
+enum ERROR_FLAGS
+{
+	ERRF_NOT_COMPILED=1,
+	ERRF_NO_ROOTSIGNATURE_FILE=2,
+	ERRF_ROOTSIGNATURE_MISMATCH=4,
+};
+
 int main(int argc, char* argv[])
 {
 	SFXCode Code;
 	int pos;
 	std::string s;
 	char p[1024]="";
+	int nRet=0;
 	
 	_getcwd(p,sizeof(p));
 	g_sDir=p;
@@ -360,6 +368,7 @@ int main(int argc, char* argv[])
 			g_asFiles.push_back(std::make_tuple(arg,"",false,""));
 	}
 
+	std::map<std::string,int> mErrorFiles;
 	std::string sOutput;
 	std::string sSrc,sOut,sRSName;
 	bool bBIN;
@@ -381,6 +390,17 @@ int main(int argc, char* argv[])
 		
 		if (bRes)
 		{
+			if (sOutput.find("RootSignature file '")!=-1)
+			{
+				nRet|=ERRF_NO_ROOTSIGNATURE_FILE;
+				mErrorFiles[sSrc]|=ERRF_NO_ROOTSIGNATURE_FILE;
+			}
+			if (sOutput.find("RootSignature '")!=-1)
+			{
+				nRet|=ERRF_ROOTSIGNATURE_MISMATCH;
+				mErrorFiles[sSrc]|=ERRF_ROOTSIGNATURE_MISMATCH;
+			}
+
 			if (sOut.length())	//Recover Upper case in file name
 			{
 				std::string sName=sOut;
@@ -452,7 +472,23 @@ int main(int argc, char* argv[])
 
 			printf("compilation succeeded;\n");
 		}
+		else
+		{
+			mErrorFiles[sSrc]|=ERRF_NOT_COMPILED;
+			nRet|=ERRF_NOT_COMPILED;
+		}
 	}
+
+	if (mErrorFiles.size())
+	{
+		printf("\nCertain files were compiled with issues:\n");
+		for (auto &pair:	mErrorFiles)
+			printf("0x%.2x\t%s\n",pair.second,pair.first.c_str());
+
+		printf("\nPress any key..\n");
+		scanf_s("a");
+	}
+
 	/*
 	std::string sErr;
 	FXCompile("bkgr.fx","",D3DCOMPILE_DEBUG | D3DCOMPILE_OPTIMIZATION_LEVEL3,Code,sErr);
@@ -467,4 +503,6 @@ int main(int argc, char* argv[])
 		printf("====Errors====\n%s\n==========\n",sErr.c_str());
 	}
 	*/
+
+	return nRet;
 }
