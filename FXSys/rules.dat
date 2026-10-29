@@ -60,7 +60,7 @@ semantic_def=[ETN_ID]
 
 define_id=[ETN_ID] {array_dim}* ([ETN_OP_ELSE] ({register_def} | {semantic_def}))?
 type={kw_struct} | ([ETN_KW_SIGNED,ETN_KW_UNSIGNED]? ([ETN_ID, ETN_KW_VOID]) ([ETN_OP_LESS] {template_expression} [ETN_OP_GATE])?)
-var_qualified_type=[ETN_KW_UNIFORM-ETN_KW_VOLATILE, ETN_KW_CONST-ETN_KW_COLMAJOR]* {type}
+var_qualified_type=[ETN_KW_UNIFORM-ETN_KW_GLOBALLYCOHERENT, ETN_KW_CONST-ETN_KW_COLMAJOR]* {type}
 id_def={var_qualified_type}  (({define_id} {init_list}?) ([ETN_COMMA] ({define_id} {init_list}?))*)?
 id_def_strict={var_qualified_type}  {define_id} ([ETN_COMMA] {define_id})*
 var_def= {id_def} [ETN_SEMICOLON]

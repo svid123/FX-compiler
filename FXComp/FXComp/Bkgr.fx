@@ -13,7 +13,7 @@ struct SS
 typedef float3 TArrayFloats0[2];
 typedef TArrayFloats0 TArrayFloats[3];
 typedef volatile float3 vec3;
-
+typedef globallycoherent RWTexture2D<float> TRW;
 
 
 
@@ -30,7 +30,7 @@ typedef int TTT,ZZ[2];
 static const float F[2] = {10, 20};
 float4 vec=int4(1,0.3,1,1),vec1,vec2=false;
 
-
+TRW tex;
 
 
 [root_param]
