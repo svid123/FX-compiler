@@ -4,3 +4,5 @@
 **/x86
 **/*.dll
 **/*.res
+**/Gaming.Xbox.Scarlett.x64
+**/*.log
