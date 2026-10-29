@@ -13,7 +13,7 @@ struct SS
 typedef float3 TArrayFloats0[2];
 typedef TArrayFloats0 TArrayFloats[3];
 typedef volatile float3 vec3;
-
+typedef globallycoherent RWTexture2D<float> TRW;
 
 
 
@@ -30,7 +30,7 @@ typedef int TTT,ZZ[2];
 static const float F[2] = {10, 20};
 float4 vec=int4(1,0.3,1,1),vec1,vec2=false;
 
-
+TRW tex;
 
 
 [root_param]
@@ -287,15 +287,11 @@ void MeshShader(
     out vertices MyOutputVertex verts[3],
     out indices uint3 triangles[3])
 {
+	
 }
 
 technique T0
 {
-    pass PM
-    {
-		SetMeshShader(65,MeshShader);
-    }
-/*
     pass P0
     {
 		SetBlendState(BS_AlphaBlend,-1,0xFFFFFFFF);
@@ -314,7 +310,7 @@ technique T0
 		SetVertexShader(60, VertOut);
 		SetPixelShader(60, PixOut);
     }
-*/
+
 /*
     pass P1	//Draw less, don't change Z
     {

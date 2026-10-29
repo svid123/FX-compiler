@@ -81,6 +81,7 @@
 [ETN_KW_GROUPSHARED, groupshared]=groupshared
 [ETN_KW_STATIC, static]=static
 [ETN_KW_VOLATILE, volatile]=volatile
+[ETN_KW_GLOBALLYCOHERENT, globallycoherent]=globallycoherent
 
 [ETN_KW_LINEAR, linear]=linear
 [ETN_KW_CENTROID, centroid]=centroid
